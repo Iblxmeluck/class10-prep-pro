@@ -117,8 +117,13 @@ function groups(isAdmin: boolean): Group[] {
         { to: "/admin/members", label: "Members", icon: Users, adminOnly: true },
         { to: "/admin/tracking", label: "Student tracking", icon: LineChart, adminOnly: true },
         { to: "/admin/store", label: "EXP & Store", icon: ShoppingBag, adminOnly: true },
+        { to: "/admin/courses", label: "Courses", icon: GraduationCap, adminOnly: true },
         { to: "/admin/demands", label: "Demands", icon: Megaphone, adminOnly: true },
       ],
+    },
+    {
+      label: "EXP",
+      items: [{ to: "/store", label: "EXP Store", icon: ShoppingBag }],
     },
 
 
