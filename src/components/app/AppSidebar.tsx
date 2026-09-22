@@ -29,6 +29,8 @@ import {
 } from "lucide-react";
 
 import { useQuery } from "@tanstack/react-query";
+import { useServerFn } from "@tanstack/react-start";
+import { myActiveCourses } from "@/lib/courses.functions";
 
 import type { FileRouteTypes } from "@/routeTree.gen";
 import { supabase } from "@/integrations/supabase/client";
@@ -117,8 +119,13 @@ function groups(isAdmin: boolean): Group[] {
         { to: "/admin/members", label: "Members", icon: Users, adminOnly: true },
         { to: "/admin/tracking", label: "Student tracking", icon: LineChart, adminOnly: true },
         { to: "/admin/store", label: "EXP & Store", icon: ShoppingBag, adminOnly: true },
+        { to: "/admin/courses", label: "Courses", icon: GraduationCap, adminOnly: true },
         { to: "/admin/demands", label: "Demands", icon: Megaphone, adminOnly: true },
       ],
+    },
+    {
+      label: "EXP",
+      items: [{ to: "/store", label: "EXP Store", icon: ShoppingBag }],
     },
 
 
@@ -146,6 +153,13 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const { data: session } = useSessionInfo();
   const nav = groups(Boolean(session?.isAdmin));
+  const loadCourses = useServerFn(myActiveCourses);
+  const { data: myCourses } = useQuery({
+    queryKey: ["my-courses", session?.userId],
+    enabled: !!session?.userId,
+    refetchInterval: 60_000,
+    queryFn: () => loadCourses({ data: {} as never }),
+  });
   const { data: myPages } = useQuery({
     queryKey: ["my-pages", session?.userId],
     enabled: !!session?.userId,
@@ -188,6 +202,30 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         ))}
+        {(myCourses ?? []).length > 0 && (
+          <SidebarGroup>
+            {!collapsed && <SidebarGroupLabel>Courses</SidebarGroupLabel>}
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {(myCourses ?? []).map((c) => (
+                  <SidebarMenuItem key={c.id}>
+                    <SidebarMenuButton asChild tooltip={c.name}>
+                      <Link
+                        to="/courses/$courseId"
+                        params={{ courseId: c.id }}
+                        activeProps={{ className: "bg-sidebar-accent text-sidebar-accent-foreground font-medium" }}
+                        className="flex items-center gap-2"
+                      >
+                        <GraduationCap className="h-4 w-4 shrink-0" />
+                        <span className="truncate">{c.name}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
         {(myPages ?? []).length > 0 && (
           <SidebarGroup>
             {!collapsed && <SidebarGroupLabel>Unlocked</SidebarGroupLabel>}

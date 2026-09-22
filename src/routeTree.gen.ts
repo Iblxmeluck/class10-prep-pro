@@ -28,11 +28,13 @@ import { Route as AuthenticatedPracticeRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedQuizzesRouteImport } from './routes/_authenticated/quizzes'
 import { Route as AuthenticatedResourcesRouteImport } from './routes/_authenticated/resources'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedStoreRouteImport } from './routes/_authenticated/store'
 import { Route as AuthenticatedTodoRouteImport } from './routes/_authenticated/todo'
 import { Route as AuthenticatedTrackerRouteImport } from './routes/_authenticated/tracker'
 import { Route as AuthenticatedVideosRouteImport } from './routes/_authenticated/videos'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin/index'
 import { Route as AuthenticatedAdminChaptersRouteImport } from './routes/_authenticated/admin/chapters'
+import { Route as AuthenticatedAdminCoursesRouteImport } from './routes/_authenticated/admin/courses'
 import { Route as AuthenticatedAdminDemandsRouteImport } from './routes/_authenticated/admin/demands'
 import { Route as AuthenticatedAdminEventsRouteImport } from './routes/_authenticated/admin/events'
 import { Route as AuthenticatedAdminMembersRouteImport } from './routes/_authenticated/admin/members'
@@ -43,6 +45,7 @@ import { Route as AuthenticatedAdminStoreRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminSubjectsRouteImport } from './routes/_authenticated/admin/subjects'
 import { Route as AuthenticatedAdminTopicsRouteImport } from './routes/_authenticated/admin/topics'
 import { Route as AuthenticatedAdminTrackingRouteImport } from './routes/_authenticated/admin/tracking'
+import { Route as AuthenticatedCoursesCourseIdRouteImport } from './routes/_authenticated/courses.$courseId'
 import { Route as AuthenticatedPSlugRouteImport } from './routes/_authenticated/p.$slug'
 import { Route as AuthenticatedTopicsIndexRouteImport } from './routes/_authenticated/topics/index'
 import { Route as AuthenticatedTopicsTopicIdRouteImport } from './routes/_authenticated/topics/$topicId'
@@ -142,6 +145,11 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   path: '/settings',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedStoreRoute = AuthenticatedStoreRouteImport.update({
+  id: '/store',
+  path: '/store',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedTodoRoute = AuthenticatedTodoRouteImport.update({
   id: '/todo',
   path: '/todo',
@@ -166,6 +174,12 @@ const AuthenticatedAdminChaptersRoute =
   AuthenticatedAdminChaptersRouteImport.update({
     id: '/chapters',
     path: '/chapters',
+    getParentRoute: () => AuthenticatedAdminRouteRoute,
+  } as any)
+const AuthenticatedAdminCoursesRoute =
+  AuthenticatedAdminCoursesRouteImport.update({
+    id: '/courses',
+    path: '/courses',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
 const AuthenticatedAdminDemandsRoute =
@@ -227,6 +241,12 @@ const AuthenticatedAdminTrackingRoute =
     path: '/tracking',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedCoursesCourseIdRoute =
+  AuthenticatedCoursesCourseIdRouteImport.update({
+    id: '/courses/$courseId',
+    path: '/courses/$courseId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPSlugRoute = AuthenticatedPSlugRouteImport.update({
   id: '/p/$slug',
   path: '/p/$slug',
@@ -264,10 +284,12 @@ export interface FileRoutesByFullPath {
   '/quizzes': typeof AuthenticatedQuizzesRoute
   '/resources': typeof AuthenticatedResourcesRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/store': typeof AuthenticatedStoreRoute
   '/todo': typeof AuthenticatedTodoRoute
   '/tracker': typeof AuthenticatedTrackerRoute
   '/videos': typeof AuthenticatedVideosRoute
   '/admin/chapters': typeof AuthenticatedAdminChaptersRoute
+  '/admin/courses': typeof AuthenticatedAdminCoursesRoute
   '/admin/demands': typeof AuthenticatedAdminDemandsRoute
   '/admin/events': typeof AuthenticatedAdminEventsRoute
   '/admin/members': typeof AuthenticatedAdminMembersRoute
@@ -278,6 +300,7 @@ export interface FileRoutesByFullPath {
   '/admin/subjects': typeof AuthenticatedAdminSubjectsRoute
   '/admin/topics': typeof AuthenticatedAdminTopicsRoute
   '/admin/tracking': typeof AuthenticatedAdminTrackingRoute
+  '/courses/$courseId': typeof AuthenticatedCoursesCourseIdRoute
   '/p/$slug': typeof AuthenticatedPSlugRoute
   '/topics/$topicId': typeof AuthenticatedTopicsTopicIdRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -301,10 +324,12 @@ export interface FileRoutesByTo {
   '/quizzes': typeof AuthenticatedQuizzesRoute
   '/resources': typeof AuthenticatedResourcesRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/store': typeof AuthenticatedStoreRoute
   '/todo': typeof AuthenticatedTodoRoute
   '/tracker': typeof AuthenticatedTrackerRoute
   '/videos': typeof AuthenticatedVideosRoute
   '/admin/chapters': typeof AuthenticatedAdminChaptersRoute
+  '/admin/courses': typeof AuthenticatedAdminCoursesRoute
   '/admin/demands': typeof AuthenticatedAdminDemandsRoute
   '/admin/events': typeof AuthenticatedAdminEventsRoute
   '/admin/members': typeof AuthenticatedAdminMembersRoute
@@ -315,6 +340,7 @@ export interface FileRoutesByTo {
   '/admin/subjects': typeof AuthenticatedAdminSubjectsRoute
   '/admin/topics': typeof AuthenticatedAdminTopicsRoute
   '/admin/tracking': typeof AuthenticatedAdminTrackingRoute
+  '/courses/$courseId': typeof AuthenticatedCoursesCourseIdRoute
   '/p/$slug': typeof AuthenticatedPSlugRoute
   '/topics/$topicId': typeof AuthenticatedTopicsTopicIdRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -341,10 +367,12 @@ export interface FileRoutesById {
   '/_authenticated/quizzes': typeof AuthenticatedQuizzesRoute
   '/_authenticated/resources': typeof AuthenticatedResourcesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/store': typeof AuthenticatedStoreRoute
   '/_authenticated/todo': typeof AuthenticatedTodoRoute
   '/_authenticated/tracker': typeof AuthenticatedTrackerRoute
   '/_authenticated/videos': typeof AuthenticatedVideosRoute
   '/_authenticated/admin/chapters': typeof AuthenticatedAdminChaptersRoute
+  '/_authenticated/admin/courses': typeof AuthenticatedAdminCoursesRoute
   '/_authenticated/admin/demands': typeof AuthenticatedAdminDemandsRoute
   '/_authenticated/admin/events': typeof AuthenticatedAdminEventsRoute
   '/_authenticated/admin/members': typeof AuthenticatedAdminMembersRoute
@@ -355,6 +383,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/subjects': typeof AuthenticatedAdminSubjectsRoute
   '/_authenticated/admin/topics': typeof AuthenticatedAdminTopicsRoute
   '/_authenticated/admin/tracking': typeof AuthenticatedAdminTrackingRoute
+  '/_authenticated/courses/$courseId': typeof AuthenticatedCoursesCourseIdRoute
   '/_authenticated/p/$slug': typeof AuthenticatedPSlugRoute
   '/_authenticated/topics/$topicId': typeof AuthenticatedTopicsTopicIdRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -381,10 +410,12 @@ export interface FileRouteTypes {
     | '/quizzes'
     | '/resources'
     | '/settings'
+    | '/store'
     | '/todo'
     | '/tracker'
     | '/videos'
     | '/admin/chapters'
+    | '/admin/courses'
     | '/admin/demands'
     | '/admin/events'
     | '/admin/members'
@@ -395,6 +426,7 @@ export interface FileRouteTypes {
     | '/admin/subjects'
     | '/admin/topics'
     | '/admin/tracking'
+    | '/courses/$courseId'
     | '/p/$slug'
     | '/topics/$topicId'
     | '/admin/'
@@ -418,10 +450,12 @@ export interface FileRouteTypes {
     | '/quizzes'
     | '/resources'
     | '/settings'
+    | '/store'
     | '/todo'
     | '/tracker'
     | '/videos'
     | '/admin/chapters'
+    | '/admin/courses'
     | '/admin/demands'
     | '/admin/events'
     | '/admin/members'
@@ -432,6 +466,7 @@ export interface FileRouteTypes {
     | '/admin/subjects'
     | '/admin/topics'
     | '/admin/tracking'
+    | '/courses/$courseId'
     | '/p/$slug'
     | '/topics/$topicId'
     | '/admin'
@@ -457,10 +492,12 @@ export interface FileRouteTypes {
     | '/_authenticated/quizzes'
     | '/_authenticated/resources'
     | '/_authenticated/settings'
+    | '/_authenticated/store'
     | '/_authenticated/todo'
     | '/_authenticated/tracker'
     | '/_authenticated/videos'
     | '/_authenticated/admin/chapters'
+    | '/_authenticated/admin/courses'
     | '/_authenticated/admin/demands'
     | '/_authenticated/admin/events'
     | '/_authenticated/admin/members'
@@ -471,6 +508,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/subjects'
     | '/_authenticated/admin/topics'
     | '/_authenticated/admin/tracking'
+    | '/_authenticated/courses/$courseId'
     | '/_authenticated/p/$slug'
     | '/_authenticated/topics/$topicId'
     | '/_authenticated/admin/'
@@ -618,6 +656,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/store': {
+      id: '/_authenticated/store'
+      path: '/store'
+      fullPath: '/store'
+      preLoaderRoute: typeof AuthenticatedStoreRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/todo': {
       id: '/_authenticated/todo'
       path: '/todo'
@@ -651,6 +696,13 @@ declare module '@tanstack/react-router' {
       path: '/chapters'
       fullPath: '/admin/chapters'
       preLoaderRoute: typeof AuthenticatedAdminChaptersRouteImport
+      parentRoute: typeof AuthenticatedAdminRouteRoute
+    }
+    '/_authenticated/admin/courses': {
+      id: '/_authenticated/admin/courses'
+      path: '/courses'
+      fullPath: '/admin/courses'
+      preLoaderRoute: typeof AuthenticatedAdminCoursesRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
     '/_authenticated/admin/demands': {
@@ -723,6 +775,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTrackingRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/courses/$courseId': {
+      id: '/_authenticated/courses/$courseId'
+      path: '/courses/$courseId'
+      fullPath: '/courses/$courseId'
+      preLoaderRoute: typeof AuthenticatedCoursesCourseIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/p/$slug': {
       id: '/_authenticated/p/$slug'
       path: '/p/$slug'
@@ -749,6 +808,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedAdminRouteRouteChildren {
   AuthenticatedAdminChaptersRoute: typeof AuthenticatedAdminChaptersRoute
+  AuthenticatedAdminCoursesRoute: typeof AuthenticatedAdminCoursesRoute
   AuthenticatedAdminDemandsRoute: typeof AuthenticatedAdminDemandsRoute
   AuthenticatedAdminEventsRoute: typeof AuthenticatedAdminEventsRoute
   AuthenticatedAdminMembersRoute: typeof AuthenticatedAdminMembersRoute
@@ -765,6 +825,7 @@ interface AuthenticatedAdminRouteRouteChildren {
 const AuthenticatedAdminRouteRouteChildren: AuthenticatedAdminRouteRouteChildren =
   {
     AuthenticatedAdminChaptersRoute: AuthenticatedAdminChaptersRoute,
+    AuthenticatedAdminCoursesRoute: AuthenticatedAdminCoursesRoute,
     AuthenticatedAdminDemandsRoute: AuthenticatedAdminDemandsRoute,
     AuthenticatedAdminEventsRoute: AuthenticatedAdminEventsRoute,
     AuthenticatedAdminMembersRoute: AuthenticatedAdminMembersRoute,
@@ -800,9 +861,11 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedQuizzesRoute: typeof AuthenticatedQuizzesRoute
   AuthenticatedResourcesRoute: typeof AuthenticatedResourcesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedStoreRoute: typeof AuthenticatedStoreRoute
   AuthenticatedTodoRoute: typeof AuthenticatedTodoRoute
   AuthenticatedTrackerRoute: typeof AuthenticatedTrackerRoute
   AuthenticatedVideosRoute: typeof AuthenticatedVideosRoute
+  AuthenticatedCoursesCourseIdRoute: typeof AuthenticatedCoursesCourseIdRoute
   AuthenticatedPSlugRoute: typeof AuthenticatedPSlugRoute
   AuthenticatedTopicsTopicIdRoute: typeof AuthenticatedTopicsTopicIdRoute
   AuthenticatedTopicsIndexRoute: typeof AuthenticatedTopicsIndexRoute
@@ -825,9 +888,11 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedQuizzesRoute: AuthenticatedQuizzesRoute,
   AuthenticatedResourcesRoute: AuthenticatedResourcesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedStoreRoute: AuthenticatedStoreRoute,
   AuthenticatedTodoRoute: AuthenticatedTodoRoute,
   AuthenticatedTrackerRoute: AuthenticatedTrackerRoute,
   AuthenticatedVideosRoute: AuthenticatedVideosRoute,
+  AuthenticatedCoursesCourseIdRoute: AuthenticatedCoursesCourseIdRoute,
   AuthenticatedPSlugRoute: AuthenticatedPSlugRoute,
   AuthenticatedTopicsTopicIdRoute: AuthenticatedTopicsTopicIdRoute,
   AuthenticatedTopicsIndexRoute: AuthenticatedTopicsIndexRoute,
