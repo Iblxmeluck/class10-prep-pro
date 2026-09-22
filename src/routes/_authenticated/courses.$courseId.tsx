@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
-import { Clock, GraduationCap, Lock, ZoomIn, ZoomOut } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Clock, GraduationCap, Lock, Maximize, Minimize, ZoomIn, ZoomOut } from "lucide-react";
 import { getCourseForMember } from "@/lib/courses.functions";
 import { AppShell } from "@/components/app/AppShell";
 import { Button } from "@/components/ui/button";
