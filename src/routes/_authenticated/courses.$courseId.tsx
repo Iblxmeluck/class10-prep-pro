@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useState } from "react";
-import { Clock, GraduationCap, Lock, ZoomIn, ZoomOut } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Clock, GraduationCap, Lock, Maximize, Minimize, ZoomIn, ZoomOut } from "lucide-react";
 import { getCourseForMember } from "@/lib/courses.functions";
 import { AppShell } from "@/components/app/AppShell";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,20 @@ function CoursePage() {
   const qc = useQueryClient();
   const load = useServerFn(getCourseForMember);
   const [zoom, setZoom] = useState(1);
+  const viewerRef = useRef<HTMLDivElement>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(document.fullscreenElement === viewerRef.current);
+    document.addEventListener("fullscreenchange", onChange);
+    return () => document.removeEventListener("fullscreenchange", onChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (document.fullscreenElement) void document.exitFullscreen();
+    else void viewerRef.current?.requestFullscreen?.();
+  };
+
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["course-access", courseId],
     queryFn: () => load({ data: { courseId } }),
@@ -133,14 +147,21 @@ function CoursePage() {
                 <Button variant="ghost" size="sm" onClick={() => setZoom(1)}>
                   Reset
                 </Button>
+                <Button variant="outline" size="sm" onClick={toggleFullscreen} className="ml-auto">
+                  {isFullscreen ? <Minimize className="mr-1.5 h-4 w-4" /> : <Maximize className="mr-1.5 h-4 w-4" />}
+                  {isFullscreen ? "Exit fullscreen" : "Fullscreen"}
+                </Button>
               </div>
-              <div className="h-[65vh] overflow-auto rounded-lg border border-border">
+              <div
+                ref={viewerRef}
+                className={`overflow-auto rounded-lg border border-border bg-background ${isFullscreen ? "h-screen" : "h-[65vh]"}`}
+              >
                 <iframe
                   src={course.course_url}
                   title={course.name}
                   style={{
                     width: `${100 / zoom}%`,
-                    height: `${65 / zoom}vh`,
+                    height: `${(isFullscreen ? 100 : 65) / zoom}vh`,
                     transform: `scale(${zoom})`,
                     transformOrigin: "0 0",
                     border: "none",
