@@ -43,6 +43,7 @@ import { Route as AuthenticatedAdminStoreRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminSubjectsRouteImport } from './routes/_authenticated/admin/subjects'
 import { Route as AuthenticatedAdminTopicsRouteImport } from './routes/_authenticated/admin/topics'
 import { Route as AuthenticatedAdminTrackingRouteImport } from './routes/_authenticated/admin/tracking'
+import { Route as AuthenticatedCoursesCourseIdRouteImport } from './routes/_authenticated/courses.$courseId'
 import { Route as AuthenticatedPSlugRouteImport } from './routes/_authenticated/p.$slug'
 import { Route as AuthenticatedTopicsIndexRouteImport } from './routes/_authenticated/topics/index'
 import { Route as AuthenticatedTopicsTopicIdRouteImport } from './routes/_authenticated/topics/$topicId'
@@ -227,6 +228,12 @@ const AuthenticatedAdminTrackingRoute =
     path: '/tracking',
     getParentRoute: () => AuthenticatedAdminRouteRoute,
   } as any)
+const AuthenticatedCoursesCourseIdRoute =
+  AuthenticatedCoursesCourseIdRouteImport.update({
+    id: '/courses/$courseId',
+    path: '/courses/$courseId',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPSlugRoute = AuthenticatedPSlugRouteImport.update({
   id: '/p/$slug',
   path: '/p/$slug',
@@ -278,6 +285,7 @@ export interface FileRoutesByFullPath {
   '/admin/subjects': typeof AuthenticatedAdminSubjectsRoute
   '/admin/topics': typeof AuthenticatedAdminTopicsRoute
   '/admin/tracking': typeof AuthenticatedAdminTrackingRoute
+  '/courses/$courseId': typeof AuthenticatedCoursesCourseIdRoute
   '/p/$slug': typeof AuthenticatedPSlugRoute
   '/topics/$topicId': typeof AuthenticatedTopicsTopicIdRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -315,6 +323,7 @@ export interface FileRoutesByTo {
   '/admin/subjects': typeof AuthenticatedAdminSubjectsRoute
   '/admin/topics': typeof AuthenticatedAdminTopicsRoute
   '/admin/tracking': typeof AuthenticatedAdminTrackingRoute
+  '/courses/$courseId': typeof AuthenticatedCoursesCourseIdRoute
   '/p/$slug': typeof AuthenticatedPSlugRoute
   '/topics/$topicId': typeof AuthenticatedTopicsTopicIdRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -355,6 +364,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/subjects': typeof AuthenticatedAdminSubjectsRoute
   '/_authenticated/admin/topics': typeof AuthenticatedAdminTopicsRoute
   '/_authenticated/admin/tracking': typeof AuthenticatedAdminTrackingRoute
+  '/_authenticated/courses/$courseId': typeof AuthenticatedCoursesCourseIdRoute
   '/_authenticated/p/$slug': typeof AuthenticatedPSlugRoute
   '/_authenticated/topics/$topicId': typeof AuthenticatedTopicsTopicIdRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -395,6 +405,7 @@ export interface FileRouteTypes {
     | '/admin/subjects'
     | '/admin/topics'
     | '/admin/tracking'
+    | '/courses/$courseId'
     | '/p/$slug'
     | '/topics/$topicId'
     | '/admin/'
@@ -432,6 +443,7 @@ export interface FileRouteTypes {
     | '/admin/subjects'
     | '/admin/topics'
     | '/admin/tracking'
+    | '/courses/$courseId'
     | '/p/$slug'
     | '/topics/$topicId'
     | '/admin'
@@ -471,6 +483,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/subjects'
     | '/_authenticated/admin/topics'
     | '/_authenticated/admin/tracking'
+    | '/_authenticated/courses/$courseId'
     | '/_authenticated/p/$slug'
     | '/_authenticated/topics/$topicId'
     | '/_authenticated/admin/'
@@ -723,6 +736,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminTrackingRouteImport
       parentRoute: typeof AuthenticatedAdminRouteRoute
     }
+    '/_authenticated/courses/$courseId': {
+      id: '/_authenticated/courses/$courseId'
+      path: '/courses/$courseId'
+      fullPath: '/courses/$courseId'
+      preLoaderRoute: typeof AuthenticatedCoursesCourseIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/p/$slug': {
       id: '/_authenticated/p/$slug'
       path: '/p/$slug'
@@ -803,6 +823,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedTodoRoute: typeof AuthenticatedTodoRoute
   AuthenticatedTrackerRoute: typeof AuthenticatedTrackerRoute
   AuthenticatedVideosRoute: typeof AuthenticatedVideosRoute
+  AuthenticatedCoursesCourseIdRoute: typeof AuthenticatedCoursesCourseIdRoute
   AuthenticatedPSlugRoute: typeof AuthenticatedPSlugRoute
   AuthenticatedTopicsTopicIdRoute: typeof AuthenticatedTopicsTopicIdRoute
   AuthenticatedTopicsIndexRoute: typeof AuthenticatedTopicsIndexRoute
@@ -828,6 +849,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedTodoRoute: AuthenticatedTodoRoute,
   AuthenticatedTrackerRoute: AuthenticatedTrackerRoute,
   AuthenticatedVideosRoute: AuthenticatedVideosRoute,
+  AuthenticatedCoursesCourseIdRoute: AuthenticatedCoursesCourseIdRoute,
   AuthenticatedPSlugRoute: AuthenticatedPSlugRoute,
   AuthenticatedTopicsTopicIdRoute: AuthenticatedTopicsTopicIdRoute,
   AuthenticatedTopicsIndexRoute: AuthenticatedTopicsIndexRoute,
