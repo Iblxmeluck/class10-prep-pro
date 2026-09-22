@@ -27,6 +27,7 @@ function CoursePage() {
   const { courseId } = Route.useParams();
   const qc = useQueryClient();
   const load = useServerFn(getCourseForMember);
+  const [zoom, setZoom] = useState(1);
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["course-access", courseId],
     queryFn: () => load({ data: { courseId } }),
