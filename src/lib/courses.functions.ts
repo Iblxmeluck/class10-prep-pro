@@ -86,10 +86,7 @@ export const purchaseCourse = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) => z.object({ courseId: z.string().uuid() }).parse(d))
   .handler(async ({ data, context }) => {
-    const { data: res, error } = await (context.supabase.rpc as (n: string, a: unknown) => Promise<{ data: unknown; error: { message: string } | null }>)(
-      "purchase_exp_course",
-      { _course: data.courseId },
-    );
+    const { data: res, error } = await context.supabase.rpc("purchase_exp_course", { _course: data.courseId });
     if (error) throw new Error(error.message.includes("Not enough EXP") ? "You do not have enough EXP" : error.message);
     return res as { ok: boolean; alreadyOwned: boolean; balance?: number; expiresAt?: string };
   });
@@ -183,9 +180,9 @@ export const setCourseFlags = createServerFn({ method: "POST" })
   .handler(async ({ data, context }) => {
     await assertAdmin(context);
     const db = await admin();
-    const patch: Record<string, boolean> = {};
-    if (data.isActive !== undefined) patch['is_active'] = data.isActive;
-    if (data.storeVisible !== undefined) patch['store_visible'] = data.storeVisible;
+    const patch: { is_active?: boolean; store_visible?: boolean } = {};
+    if (data.isActive !== undefined) patch.is_active = data.isActive;
+    if (data.storeVisible !== undefined) patch.store_visible = data.storeVisible;
     if (Object.keys(patch).length) await db.from("exp_courses").update(patch).eq("id", data.id);
     return { ok: true };
   });
