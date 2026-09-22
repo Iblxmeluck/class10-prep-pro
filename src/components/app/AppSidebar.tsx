@@ -255,6 +255,7 @@ export function AppSidebar() {
                   <Collapsible
                     key={s.key}
                     asChild
+                    className="group/collapsible"
                     open={open[s.key] ?? false}
                     onOpenChange={(v) => setOpen((p) => ({ ...p, [s.key]: v }))}
                   >
@@ -273,6 +274,7 @@ export function AppSidebar() {
                               <Collapsible
                                 key={item.to}
                                 asChild
+                                className="group/collapsible"
                                 defaultOpen={flatten([item]).some((c) => isActive(c.to))}
                               >
                                 <SidebarMenuSubItem>
