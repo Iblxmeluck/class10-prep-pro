@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { Clock, GraduationCap, Lock, ExternalLink } from "lucide-react";
+import { useState } from "react";
+import { Clock, GraduationCap, Lock, ZoomIn, ZoomOut } from "lucide-react";
 import { getCourseForMember } from "@/lib/courses.functions";
 import { AppShell } from "@/components/app/AppShell";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ function CoursePage() {
   const { courseId } = Route.useParams();
   const qc = useQueryClient();
   const load = useServerFn(getCourseForMember);
+  const [zoom, setZoom] = useState(1);
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["course-access", courseId],
     queryFn: () => load({ data: { courseId } }),
@@ -108,26 +110,45 @@ function CoursePage() {
         {course.course_url ? (
           <Card>
             <CardContent className="space-y-3 py-5">
-              <div className="overflow-hidden rounded-lg border border-border">
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setZoom((z) => Math.max(0.5, Math.round((z - 0.1) * 10) / 10))}
+                  aria-label="Zoom out"
+                >
+                  <ZoomOut className="h-4 w-4" />
+                </Button>
+                <span className="min-w-14 text-center text-sm font-medium tabular-nums">
+                  {Math.round(zoom * 100)}%
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setZoom((z) => Math.min(2, Math.round((z + 0.1) * 10) / 10))}
+                  aria-label="Zoom in"
+                >
+                  <ZoomIn className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="sm" onClick={() => setZoom(1)}>
+                  Reset
+                </Button>
+              </div>
+              <div className="h-[65vh] overflow-auto rounded-lg border border-border">
                 <iframe
                   src={course.course_url}
                   title={course.name}
-                  className="h-[65vh] w-full"
+                  style={{
+                    width: `${100 / zoom}%`,
+                    height: `${65 / zoom}vh`,
+                    transform: `scale(${zoom})`,
+                    transformOrigin: "0 0",
+                    border: "none",
+                  }}
                   sandbox="allow-scripts allow-same-origin allow-forms allow-popups"
                   referrerPolicy="no-referrer"
                 />
               </div>
-              <p className="text-xs text-muted-foreground">
-                Some course websites do not allow being shown inside another page. If the box above stays blank, open
-                the course directly.
-              </p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => window.open(course.course_url!, "_blank", "noopener,noreferrer")}
-              >
-                <ExternalLink className="mr-1.5 h-4 w-4" /> Open course website
-              </Button>
             </CardContent>
           </Card>
         ) : null}
