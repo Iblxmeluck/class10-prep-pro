@@ -13,7 +13,6 @@ import {
   setCourseFlags,
   type DurationUnit,
 } from "@/lib/courses.functions";
-import { AppShell } from "@/components/app/AppShell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -104,7 +103,7 @@ function AdminCoursesPage() {
     p.status !== "active" ? "Cancelled" : !p.expires_at || new Date(p.expires_at) > new Date() ? "Active" : "Expired";
 
   return (
-    <AppShell>
+    <>
       <div className="space-y-6">
         <div>
           <h1 className="font-display text-xl font-semibold sm:text-2xl">Courses</h1>
@@ -337,6 +336,6 @@ function AdminCoursesPage() {
           </CardContent>
         </Card>
       </div>
-    </AppShell>
+    </>
   );
 }
