@@ -193,6 +193,30 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         ))}
+        {(myCourses ?? []).length > 0 && (
+          <SidebarGroup>
+            {!collapsed && <SidebarGroupLabel>Courses</SidebarGroupLabel>}
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {(myCourses ?? []).map((c) => (
+                  <SidebarMenuItem key={c.id}>
+                    <SidebarMenuButton asChild tooltip={c.name}>
+                      <Link
+                        to="/courses/$courseId"
+                        params={{ courseId: c.id }}
+                        activeProps={{ className: "bg-sidebar-accent text-sidebar-accent-foreground font-medium" }}
+                        className="flex items-center gap-2"
+                      >
+                        <GraduationCap className="h-4 w-4 shrink-0" />
+                        <span className="truncate">{c.name}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
         {(myPages ?? []).length > 0 && (
           <SidebarGroup>
             {!collapsed && <SidebarGroupLabel>Unlocked</SidebarGroupLabel>}
