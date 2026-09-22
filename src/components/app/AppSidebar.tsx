@@ -151,6 +151,13 @@ export function AppSidebar() {
   const collapsed = state === "collapsed";
   const { data: session } = useSessionInfo();
   const nav = groups(Boolean(session?.isAdmin));
+  const loadCourses = useServerFn(myActiveCourses);
+  const { data: myCourses } = useQuery({
+    queryKey: ["my-courses", session?.userId],
+    enabled: !!session?.userId,
+    refetchInterval: 60_000,
+    queryFn: () => loadCourses({ data: {} as never }),
+  });
   const { data: myPages } = useQuery({
     queryKey: ["my-pages", session?.userId],
     enabled: !!session?.userId,
