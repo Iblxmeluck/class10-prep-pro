@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AppShell } from "@/components/app/AppShell";
 import { ExpStore } from "@/components/app/ExpStore";
 import { CourseStore } from "@/components/app/CourseStore";
 
@@ -19,11 +18,11 @@ export const Route = createFileRoute("/_authenticated/store")({
 
 function StorePage() {
   return (
-    <AppShell>
+    <>
       <div className="space-y-8">
         <CourseStore />
         <ExpStore />
       </div>
-    </AppShell>
+    </>
   );
 }

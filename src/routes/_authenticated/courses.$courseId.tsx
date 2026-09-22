@@ -4,7 +4,6 @@ import { useServerFn } from "@tanstack/react-start";
 import { useEffect, useRef, useState } from "react";
 import { Clock, GraduationCap, Lock, Maximize, Minimize, ZoomIn, ZoomOut } from "lucide-react";
 import { getCourseForMember } from "@/lib/courses.functions";
-import { AppShell } from "@/components/app/AppShell";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Countdown } from "@/components/app/Countdown";
@@ -51,15 +50,15 @@ function CoursePage() {
 
   if (isLoading) {
     return (
-      <AppShell>
+      <>
         <p className="text-sm text-muted-foreground">Checking your access…</p>
-      </AppShell>
+      </>
     );
   }
 
   if (!data?.allowed) {
     return (
-      <AppShell>
+      <>
         <Card className="mx-auto max-w-md">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -80,7 +79,7 @@ function CoursePage() {
             </div>
           </CardContent>
         </Card>
-      </AppShell>
+      </>
     );
   }
 
@@ -91,7 +90,7 @@ function CoursePage() {
   };
 
   return (
-    <AppShell>
+    <>
       <div className="space-y-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="flex min-w-0 items-start gap-3">
@@ -174,6 +173,6 @@ function CoursePage() {
           </Card>
         ) : null}
       </div>
-    </AppShell>
+    </>
   );
 }
