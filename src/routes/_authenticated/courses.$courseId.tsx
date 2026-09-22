@@ -28,6 +28,20 @@ function CoursePage() {
   const qc = useQueryClient();
   const load = useServerFn(getCourseForMember);
   const [zoom, setZoom] = useState(1);
+  const viewerRef = useRef<HTMLDivElement>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+
+  useEffect(() => {
+    const onChange = () => setIsFullscreen(document.fullscreenElement === viewerRef.current);
+    document.addEventListener("fullscreenchange", onChange);
+    return () => document.removeEventListener("fullscreenchange", onChange);
+  }, []);
+
+  const toggleFullscreen = () => {
+    if (document.fullscreenElement) void document.exitFullscreen();
+    else void viewerRef.current?.requestFullscreen?.();
+  };
+
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["course-access", courseId],
     queryFn: () => load({ data: { courseId } }),
