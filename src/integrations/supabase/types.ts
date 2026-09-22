@@ -670,6 +670,101 @@ export type Database = {
         }
         Relationships: []
       }
+      exp_course_access: {
+        Row: {
+          course_id: string
+          created_at: string
+          exp_spent: number
+          expires_at: string | null
+          id: string
+          purchased_at: string
+          source: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          course_id: string
+          created_at?: string
+          exp_spent?: number
+          expires_at?: string | null
+          id?: string
+          purchased_at?: string
+          source?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          course_id?: string
+          created_at?: string
+          exp_spent?: number
+          expires_at?: string | null
+          id?: string
+          purchased_at?: string
+          source?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "exp_course_access_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "exp_courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exp_courses: {
+        Row: {
+          body: string
+          course_url: string | null
+          created_at: string
+          created_by: string | null
+          description: string
+          duration_unit: string
+          duration_value: number
+          exp_price: number
+          id: string
+          is_active: boolean
+          name: string
+          store_visible: boolean
+          thumbnail_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          body?: string
+          course_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          duration_unit?: string
+          duration_value?: number
+          exp_price?: number
+          id?: string
+          is_active?: boolean
+          name: string
+          store_visible?: boolean
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          course_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          duration_unit?: string
+          duration_value?: number
+          exp_price?: number
+          id?: string
+          is_active?: boolean
+          name?: string
+          store_visible?: boolean
+          thumbnail_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       exp_ledger: {
         Row: {
           created_at: string
@@ -2050,6 +2145,7 @@ export type Database = {
       }
       is_active_member: { Args: { _uid: string }; Returns: boolean }
       is_admin: { Args: never; Returns: boolean }
+      purchase_exp_course: { Args: { _course: string }; Returns: Json }
       study_heartbeat: { Args: { _active: boolean }; Returns: undefined }
       touch_last_login: { Args: never; Returns: undefined }
     }
