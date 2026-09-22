@@ -28,6 +28,7 @@ import { Route as AuthenticatedPracticeRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedQuizzesRouteImport } from './routes/_authenticated/quizzes'
 import { Route as AuthenticatedResourcesRouteImport } from './routes/_authenticated/resources'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedStoreRouteImport } from './routes/_authenticated/store'
 import { Route as AuthenticatedTodoRouteImport } from './routes/_authenticated/todo'
 import { Route as AuthenticatedTrackerRouteImport } from './routes/_authenticated/tracker'
 import { Route as AuthenticatedVideosRouteImport } from './routes/_authenticated/videos'
@@ -141,6 +142,11 @@ const AuthenticatedResourcesRoute = AuthenticatedResourcesRouteImport.update({
 const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
   id: '/settings',
   path: '/settings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedStoreRoute = AuthenticatedStoreRouteImport.update({
+  id: '/store',
+  path: '/store',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedTodoRoute = AuthenticatedTodoRouteImport.update({
@@ -271,6 +277,7 @@ export interface FileRoutesByFullPath {
   '/quizzes': typeof AuthenticatedQuizzesRoute
   '/resources': typeof AuthenticatedResourcesRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/store': typeof AuthenticatedStoreRoute
   '/todo': typeof AuthenticatedTodoRoute
   '/tracker': typeof AuthenticatedTrackerRoute
   '/videos': typeof AuthenticatedVideosRoute
@@ -309,6 +316,7 @@ export interface FileRoutesByTo {
   '/quizzes': typeof AuthenticatedQuizzesRoute
   '/resources': typeof AuthenticatedResourcesRoute
   '/settings': typeof AuthenticatedSettingsRoute
+  '/store': typeof AuthenticatedStoreRoute
   '/todo': typeof AuthenticatedTodoRoute
   '/tracker': typeof AuthenticatedTrackerRoute
   '/videos': typeof AuthenticatedVideosRoute
@@ -350,6 +358,7 @@ export interface FileRoutesById {
   '/_authenticated/quizzes': typeof AuthenticatedQuizzesRoute
   '/_authenticated/resources': typeof AuthenticatedResourcesRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/store': typeof AuthenticatedStoreRoute
   '/_authenticated/todo': typeof AuthenticatedTodoRoute
   '/_authenticated/tracker': typeof AuthenticatedTrackerRoute
   '/_authenticated/videos': typeof AuthenticatedVideosRoute
@@ -391,6 +400,7 @@ export interface FileRouteTypes {
     | '/quizzes'
     | '/resources'
     | '/settings'
+    | '/store'
     | '/todo'
     | '/tracker'
     | '/videos'
@@ -429,6 +439,7 @@ export interface FileRouteTypes {
     | '/quizzes'
     | '/resources'
     | '/settings'
+    | '/store'
     | '/todo'
     | '/tracker'
     | '/videos'
@@ -469,6 +480,7 @@ export interface FileRouteTypes {
     | '/_authenticated/quizzes'
     | '/_authenticated/resources'
     | '/_authenticated/settings'
+    | '/_authenticated/store'
     | '/_authenticated/todo'
     | '/_authenticated/tracker'
     | '/_authenticated/videos'
@@ -629,6 +641,13 @@ declare module '@tanstack/react-router' {
       path: '/settings'
       fullPath: '/settings'
       preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/store': {
+      id: '/_authenticated/store'
+      path: '/store'
+      fullPath: '/store'
+      preLoaderRoute: typeof AuthenticatedStoreRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/todo': {
@@ -820,6 +839,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedQuizzesRoute: typeof AuthenticatedQuizzesRoute
   AuthenticatedResourcesRoute: typeof AuthenticatedResourcesRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedStoreRoute: typeof AuthenticatedStoreRoute
   AuthenticatedTodoRoute: typeof AuthenticatedTodoRoute
   AuthenticatedTrackerRoute: typeof AuthenticatedTrackerRoute
   AuthenticatedVideosRoute: typeof AuthenticatedVideosRoute
@@ -846,6 +866,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedQuizzesRoute: AuthenticatedQuizzesRoute,
   AuthenticatedResourcesRoute: AuthenticatedResourcesRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedStoreRoute: AuthenticatedStoreRoute,
   AuthenticatedTodoRoute: AuthenticatedTodoRoute,
   AuthenticatedTrackerRoute: AuthenticatedTrackerRoute,
   AuthenticatedVideosRoute: AuthenticatedVideosRoute,
