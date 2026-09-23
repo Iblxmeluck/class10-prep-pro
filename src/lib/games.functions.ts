@@ -36,6 +36,19 @@ const GAME_LABEL: Record<(typeof GAME_KEYS)[number], string> = {
   sixty_second: "60-Second Challenge",
 };
 
+/** Server-owned score table: clients never decide how many points a round is worth. */
+const SCORE_PER_CORRECT: Record<(typeof GAME_KEYS)[number], number> = {
+  battle: 1,
+  memory_match: 20,
+  millionaire: 100,
+  escape: 1,
+  science_lab: 1,
+  time_machine: 1,
+  maths_speed: 1,
+  word_builder: 10,
+  sixty_second: 1,
+};
+
 function shuffle<T>(rows: T[]): T[] {
   const list = [...rows];
   for (let i = list.length - 1; i > 0; i--) {
@@ -325,11 +338,13 @@ export const submitGameRound = createServerFn({ method: "POST" })
       total = results.length;
       if (attemptRows.length) await supabaseAdmin.from("question_attempts").insert(attemptRows);
     } else {
-      correct = data.correct ?? 0;
-      total = data.total ?? 0;
+      // Flashcard-based games report their own tallies; clamp them to sane bounds.
+      total = Math.min(Math.max(0, data.total ?? 0), 30);
+      correct = Math.min(Math.max(0, data.correct ?? 0), total);
     }
 
-    const score = data.points ?? correct;
+    // Score is always derived on the server; any client-sent `points` is ignored.
+    const score = correct * (SCORE_PER_CORRECT[data.gameKey] ?? 1);
 
     const { data: prev } = await supabaseAdmin
       .from("game_attempts")
