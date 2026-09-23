@@ -51,6 +51,13 @@ export const bootstrapAdmin = createServerFn({ method: "POST" })
       .eq("role", "admin");
     if ((count ?? 0) > 0) throw new Error("An administrator already exists");
 
+    // Only usable on a brand-new, empty installation. Once any account exists,
+    // new administrators must be created by a signed-in administrator.
+    const { count: profileCount } = await supabaseAdmin
+      .from("profiles")
+      .select("id", { count: "exact", head: true });
+    if ((profileCount ?? 0) > 0) throw new Error("Setup is already complete");
+
     const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
       email: emailFor(data.username),
       password: data.password,
