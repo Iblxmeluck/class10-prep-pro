@@ -61,6 +61,62 @@ export const awardExpForEvent = createServerFn({ method: "POST" })
     return { gained };
   });
 
+/** Game points a student has not turned into EXP yet. */
+export const getGamePoints = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const db = await admin();
+    const [ruleRes, attemptsRes, ledgerRes] = await Promise.all([
+      db.from("exp_rules").select("exp, enabled").eq("key", "game_point").maybeSingle(),
+      db
+        .from("game_attempts")
+        .select("id, score")
+        .eq("user_id", context.userId)
+        .order("created_at", { ascending: false })
+        .limit(300),
+      db.from("exp_ledger").select("ref").eq("user_id", context.userId).eq("reason", "game_point").limit(2000),
+    ]);
+    const done = new Set((ledgerRes.data ?? []).map((l) => l.ref));
+    const pending = (attemptsRes.data ?? []).filter((a) => !done.has(a.id) && a.score > 0);
+    const points = pending.reduce((s, a) => s + a.score, 0);
+    const rate = ruleRes.data?.enabled ? (ruleRes.data.exp ?? 0) : 0;
+    return { points, rate, exp: points * rate, enabled: Boolean(ruleRes.data?.enabled) };
+  });
+
+/** Turn earned game points into EXP (each round is counted only once). */
+export const convertGamePoints = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const db = await admin();
+    const { data: rule } = await db.from("exp_rules").select("exp, enabled").eq("key", "game_point").maybeSingle();
+    if (!rule?.enabled || !rule.exp) throw new Error("Game point conversion is turned off");
+    const [attemptsRes, ledgerRes] = await Promise.all([
+      db
+        .from("game_attempts")
+        .select("id, score")
+        .eq("user_id", context.userId)
+        .order("created_at", { ascending: false })
+        .limit(300),
+      db.from("exp_ledger").select("ref").eq("user_id", context.userId).eq("reason", "game_point").limit(2000),
+    ]);
+    const done = new Set((ledgerRes.data ?? []).map((l) => l.ref));
+    const pending = (attemptsRes.data ?? []).filter((a) => !done.has(a.id) && a.score > 0);
+    if (!pending.length) return { gained: 0, points: 0 };
+    let gained = 0;
+    let points = 0;
+    for (const a of pending) {
+      gained += await addExp(db, context.userId, rule.exp * a.score, "game_point", a.id);
+      points += a.score;
+    }
+    if (gained)
+      await db.from("activity_logs").insert({
+        user_id: context.userId,
+        event: "game_points_converted",
+        detail: `${points} points → ${gained} EXP`,
+      });
+    return { gained, points };
+  });
+
 export const getExpStore = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
