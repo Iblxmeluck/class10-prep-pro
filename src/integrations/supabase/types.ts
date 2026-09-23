@@ -2136,6 +2136,7 @@ export type Database = {
         Args: { _page: string; _uid: string }
         Returns: boolean
       }
+      dashboard_counts: { Args: never; Returns: Json }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

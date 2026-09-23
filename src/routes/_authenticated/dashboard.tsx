@@ -91,34 +91,35 @@ function Dashboard() {
 
   const { data } = useQuery({
     queryKey: ["dashboard-v2"],
+    staleTime: 2 * 60_000,
     queryFn: async () => {
-      const head = { count: "exact" as const, head: true };
-      const [subjects, chapters, attempts, logs, questions, quizzes, tests, cards, resources, links] = await Promise.all([
+      const [subjects, chapters, attempts, logs, counts] = await Promise.all([
         supabase.from("subjects").select("id, name, icon").order("sort_order"),
         supabase.from("chapters").select("id, name, subject_id"),
-        supabase.from("question_attempts").select("is_correct, is_skipped, question_id, created_at, questions(subject_id, chapter_id)").limit(2000),
+        supabase
+          .from("question_attempts")
+          .select("is_correct, is_skipped, question_id, created_at, questions(subject_id, chapter_id)")
+          .order("created_at", { ascending: false })
+          .limit(500),
         supabase.from("activity_logs").select("id, event, detail, created_at").order("created_at", { ascending: false }).limit(6),
-        supabase.from("questions").select("id", head),
-        supabase.from("quizzes").select("id", head),
-        supabase.from("tests").select("id", head),
-        supabase.from("flashcards").select("id", head),
-        supabase.from("resources").select("id", head),
-        supabase.from("links").select("id", head),
+        supabase.rpc("dashboard_counts"),
       ]);
+      const c = (counts.data ?? {}) as Record<string, number>;
       return {
         subjects: subjects.data ?? [],
         chapters: chapters.data ?? [],
         attempts: attempts.data ?? [],
         logs: logs.data ?? [],
         counts: {
-          questions: questions.count ?? 0,
-          testsQuizzes: (quizzes.count ?? 0) + (tests.count ?? 0),
-          flashcards: cards.count ?? 0,
-          resources: (resources.count ?? 0) + (links.count ?? 0),
+          questions: c["questions"] ?? 0,
+          testsQuizzes: (c["quizzes"] ?? 0) + (c["tests"] ?? 0),
+          flashcards: c["flashcards"] ?? 0,
+          resources: (c["resources"] ?? 0) + (c["links"] ?? 0),
         },
       };
     },
   });
+
 
   const attempts = data?.attempts ?? [];
   const answered = attempts.filter((a) => !a.is_skipped);
