@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ExternalLink, Trash2, Plus } from "lucide-react";
+import { ExternalLink, Lock, Trash2, Plus } from "lucide-react";
+import { Link as RouterLink } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSessionInfo } from "@/hooks/useSession";
@@ -299,15 +300,31 @@ export function LinkLibrary({ kind, addTitle, emptyText, placeholder, topicId: t
                     {l.subjects?.name && <Badge variant="secondary">{l.subjects.name}</Badge>}
                     {l.chapters?.name && <Badge variant="outline">{l.chapters.name}</Badge>}
                     {l.topics?.name && <Badge variant="outline">{l.topics.name}</Badge>}
+                    {isLocked && (
+                      <Badge className="gap-1">
+                        <Lock className="h-3 w-3" /> {price} EXP
+                      </Badge>
+                    )}
                   </div>
-                  <a
-                    href={l.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
-                  >
-                    Open link <ExternalLink className="h-3.5 w-3.5" />
-                  </a>
+                  {isLocked ? (
+                    <div className="flex flex-wrap items-center gap-2 rounded-lg border border-dashed border-border bg-muted/40 p-3">
+                      <p className="flex-1 text-sm text-muted-foreground">
+                        Locked — unlock this in the EXP Store for {price} EXP.
+                      </p>
+                      <Button asChild size="sm">
+                        <RouterLink to="/store">Unlock</RouterLink>
+                      </Button>
+                    </div>
+                  ) : (
+                    <a
+                      href={l.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                    >
+                      Open link <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
+                  )}
                 </CardContent>
               </Card>
             );
