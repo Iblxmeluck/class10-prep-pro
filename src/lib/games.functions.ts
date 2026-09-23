@@ -325,11 +325,13 @@ export const submitGameRound = createServerFn({ method: "POST" })
       total = results.length;
       if (attemptRows.length) await supabaseAdmin.from("question_attempts").insert(attemptRows);
     } else {
-      correct = data.correct ?? 0;
-      total = data.total ?? 0;
+      // Flashcard-based games report their own tallies; clamp them to sane bounds.
+      total = Math.min(Math.max(0, data.total ?? 0), 30);
+      correct = Math.min(Math.max(0, data.correct ?? 0), total);
     }
 
-    const score = data.points ?? correct;
+    // Score is always derived on the server; any client-sent `points` is ignored.
+    const score = correct * (SCORE_PER_CORRECT[data.gameKey] ?? 1);
 
     const { data: prev } = await supabaseAdmin
       .from("game_attempts")
