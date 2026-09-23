@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { ExternalLink, Trash2, Plus } from "lucide-react";
+import { ExternalLink, Lock, Trash2, Plus } from "lucide-react";
+import { Link as RouterLink } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSessionInfo } from "@/hooks/useSession";
@@ -68,6 +69,24 @@ export function LinkLibrary({ kind, addTitle, emptyText, placeholder, topicId: t
       return data ?? [];
     },
   });
+
+  /** Items an admin put in the EXP Store, plus what this member already unlocked. */
+  const locks = useQuery({
+    queryKey: ["link-locks"],
+    queryFn: async () => {
+      const [items, purchases] = await Promise.all([
+        supabase.from("store_items").select("id, link_id, exp_price").eq("is_active", true).not("link_id", "is", null),
+        supabase.from("store_purchases").select("item_id"),
+      ]);
+      const owned = new Set((purchases.data ?? []).map((p) => p.item_id));
+      const map = new Map<string, number>();
+      for (const i of items.data ?? []) {
+        if (i.link_id && !owned.has(i.id)) map.set(i.link_id, i.exp_price);
+      }
+      return map;
+    },
+  });
+  const lockedPrice = (id: string) => (isAdmin ? undefined : locks.data?.get(id));
 
   const add = useMutation({
     mutationFn: async () => {
@@ -251,7 +270,9 @@ export function LinkLibrary({ kind, addTitle, emptyText, placeholder, topicId: t
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {links.data.map((l) => {
-            const embed = kind === "video" ? youtubeEmbed(l.url) : null;
+            const price = lockedPrice(l.id);
+            const isLocked = price !== undefined;
+            const embed = kind === "video" && !isLocked ? youtubeEmbed(l.url) : null;
             return (
               <Card key={l.id} className="overflow-hidden">
                 {embed && (
@@ -279,15 +300,31 @@ export function LinkLibrary({ kind, addTitle, emptyText, placeholder, topicId: t
                     {l.subjects?.name && <Badge variant="secondary">{l.subjects.name}</Badge>}
                     {l.chapters?.name && <Badge variant="outline">{l.chapters.name}</Badge>}
                     {l.topics?.name && <Badge variant="outline">{l.topics.name}</Badge>}
+                    {isLocked && (
+                      <Badge className="gap-1">
+                        <Lock className="h-3 w-3" /> {price} EXP
+                      </Badge>
+                    )}
                   </div>
-                  <a
-                    href={l.url}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
-                  >
-                    Open link <ExternalLink className="h-3.5 w-3.5" />
-                  </a>
+                  {isLocked ? (
+                    <div className="flex flex-wrap items-center gap-2 rounded-lg border border-dashed border-border bg-muted/40 p-3">
+                      <p className="flex-1 text-sm text-muted-foreground">
+                        Locked — unlock this in the EXP Store for {price} EXP.
+                      </p>
+                      <Button asChild size="sm">
+                        <RouterLink to="/store">Unlock</RouterLink>
+                      </Button>
+                    </div>
+                  ) : (
+                    <a
+                      href={l.url}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
+                    >
+                      Open link <ExternalLink className="h-3.5 w-3.5" />
+                    </a>
+                  )}
                 </CardContent>
               </Card>
             );
