@@ -13,7 +13,8 @@ import {
   Star,
   Video,
 } from "lucide-react";
-import { getExpStore, purchaseStoreItem } from "@/lib/exp.functions";
+import { convertGamePoints, getExpStore, getGamePoints, purchaseStoreItem } from "@/lib/exp.functions";
+import { Gamepad2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -73,6 +74,8 @@ export function ExpStore() {
           <p className="text-xs text-muted-foreground">Earned in total: {data.lifetime} EXP</p>
         </CardContent>
       </Card>
+
+      <GamePointsCard />
 
       <div>
         <h2 className="font-display text-lg font-semibold">Store</h2>
