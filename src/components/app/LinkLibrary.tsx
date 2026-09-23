@@ -69,6 +69,24 @@ export function LinkLibrary({ kind, addTitle, emptyText, placeholder, topicId: t
     },
   });
 
+  /** Items an admin put in the EXP Store, plus what this member already unlocked. */
+  const locks = useQuery({
+    queryKey: ["link-locks"],
+    queryFn: async () => {
+      const [items, purchases] = await Promise.all([
+        supabase.from("store_items").select("id, link_id, exp_price").eq("is_active", true).not("link_id", "is", null),
+        supabase.from("store_purchases").select("item_id"),
+      ]);
+      const owned = new Set((purchases.data ?? []).map((p) => p.item_id));
+      const map = new Map<string, number>();
+      for (const i of items.data ?? []) {
+        if (i.link_id && !owned.has(i.id)) map.set(i.link_id, i.exp_price);
+      }
+      return map;
+    },
+  });
+  const lockedPrice = (id: string) => (isAdmin ? undefined : locks.data?.get(id));
+
   const add = useMutation({
     mutationFn: async () => {
       const clean = url.trim();
@@ -251,7 +269,9 @@ export function LinkLibrary({ kind, addTitle, emptyText, placeholder, topicId: t
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
           {links.data.map((l) => {
-            const embed = kind === "video" ? youtubeEmbed(l.url) : null;
+            const price = lockedPrice(l.id);
+            const isLocked = price !== undefined;
+            const embed = kind === "video" && !isLocked ? youtubeEmbed(l.url) : null;
             return (
               <Card key={l.id} className="overflow-hidden">
                 {embed && (
