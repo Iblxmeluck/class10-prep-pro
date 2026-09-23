@@ -197,3 +197,45 @@ export function ExpStore() {
     </div>
   );
 }
+
+function GamePointsCard() {
+  const qc = useQueryClient();
+  const load = useServerFn(getGamePoints);
+  const convert = useServerFn(convertGamePoints);
+
+  const { data } = useQuery({ queryKey: ["game-points"], queryFn: () => load({ data: {} as never }) });
+
+  const run = useMutation({
+    mutationFn: () => convert({ data: {} as never }),
+    onSuccess: (res) => {
+      toast.success(res.gained ? `${res.points} points turned into ${res.gained} EXP` : "No new points to convert");
+      qc.invalidateQueries({ queryKey: ["game-points"] });
+      qc.invalidateQueries({ queryKey: ["exp-store"] });
+      qc.invalidateQueries({ queryKey: ["my-exp"] });
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Could not convert points"),
+  });
+
+  if (!data || !data.enabled) return null;
+
+  return (
+    <Card>
+      <CardContent className="flex flex-wrap items-center justify-between gap-3 py-5">
+        <div className="flex items-center gap-3">
+          <span className="grid h-11 w-11 place-items-center rounded-xl bg-secondary text-secondary-foreground">
+            <Gamepad2 className="h-5 w-5" />
+          </span>
+          <div>
+            <p className="font-medium">Game points</p>
+            <p className="text-sm text-muted-foreground">
+              {data.points} points ready · {data.rate} EXP per point
+            </p>
+          </div>
+        </div>
+        <Button size="sm" disabled={!data.points || run.isPending} onClick={() => run.mutate()}>
+          {data.points ? `Convert to ${data.exp} EXP` : "Play games to earn points"}
+        </Button>
+      </CardContent>
+    </Card>
+  );
+}
