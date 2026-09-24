@@ -46,11 +46,11 @@ function VideosPage() {
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <Button size="sm" variant={tab === "videos" ? "default" : "outline"} onClick={() => setTab("videos")}>
-          Video resources
-        </Button>
         <Button size="sm" variant={tab === "courses" ? "default" : "outline"} onClick={() => setTab("courses")}>
           Courses
+        </Button>
+        <Button size="sm" variant={tab === "videos" ? "default" : "outline"} onClick={() => setTab("videos")}>
+          Video resources
         </Button>
       </div>
 
