@@ -27,7 +27,7 @@ export const Route = createFileRoute("/_authenticated/videos")({
 
 function VideosPage() {
   const { topic } = Route.useSearch();
-  const [tab, setTab] = useState<"videos" | "courses">("videos");
+  const [tab, setTab] = useState<"videos" | "courses">(topic ? "videos" : "courses");
   return (
     <div className="space-y-6">
       {topic && (
@@ -46,11 +46,11 @@ function VideosPage() {
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <Button size="sm" variant={tab === "videos" ? "default" : "outline"} onClick={() => setTab("videos")}>
-          Video resources
-        </Button>
         <Button size="sm" variant={tab === "courses" ? "default" : "outline"} onClick={() => setTab("courses")}>
           Courses
+        </Button>
+        <Button size="sm" variant={tab === "videos" ? "default" : "outline"} onClick={() => setTab("videos")}>
+          Video resources
         </Button>
       </div>
 

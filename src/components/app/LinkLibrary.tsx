@@ -75,13 +75,26 @@ export function LinkLibrary({ kind, addTitle, emptyText, placeholder, topicId: t
     queryKey: ["link-locks"],
     queryFn: async () => {
       const [items, purchases] = await Promise.all([
-        supabase.from("store_items").select("id, link_id, exp_price").eq("is_active", true).not("link_id", "is", null),
+        supabase.from("store_items").select("id, link_id, course_id, exp_price").eq("is_active", true),
         supabase.from("store_purchases").select("item_id"),
       ]);
       const owned = new Set((purchases.data ?? []).map((p) => p.item_id));
       const map = new Map<string, number>();
+      const lockedCourses = new Map<string, number>();
       for (const i of items.data ?? []) {
-        if (i.link_id && !owned.has(i.id)) map.set(i.link_id, i.exp_price);
+        if (owned.has(i.id)) continue;
+        if (i.link_id) map.set(i.link_id, i.exp_price);
+        if (i.course_id) lockedCourses.set(i.course_id, i.exp_price);
+      }
+      // Videos that belong to a locked course stay locked here too.
+      if (lockedCourses.size) {
+        const { data: ls } = await supabase
+          .from("course_lessons")
+          .select("course_id, link_id")
+          .in("course_id", [...lockedCourses.keys()]);
+        for (const l of ls ?? []) {
+          if (l.link_id && !map.has(l.link_id)) map.set(l.link_id, lockedCourses.get(l.course_id) ?? 0);
+        }
       }
       return map;
     },
