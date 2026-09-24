@@ -70,15 +70,15 @@ export const getGamePoints = createServerFn({ method: "POST" })
       db.from("exp_rules").select("exp, enabled").eq("key", "game_point").maybeSingle(),
       db
         .from("game_attempts")
-        .select("id, score")
+        .select("id, score, correct")
         .eq("user_id", context.userId)
         .order("created_at", { ascending: false })
         .limit(300),
       db.from("exp_ledger").select("ref").eq("user_id", context.userId).eq("reason", "game_point").limit(2000),
     ]);
     const done = new Set((ledgerRes.data ?? []).map((l) => l.ref));
-    const pending = (attemptsRes.data ?? []).filter((a) => !done.has(a.id) && a.score > 0);
-    const points = pending.reduce((s, a) => s + a.score, 0);
+    const pending = (attemptsRes.data ?? []).filter((a) => !done.has(a.id) && (a.correct ?? 0) > 0);
+    const points = pending.reduce((s, a) => s + (a.correct ?? 0), 0);
     const rate = ruleRes.data?.enabled ? (ruleRes.data.exp ?? 0) : 0;
     return { points, rate, exp: points * rate, enabled: Boolean(ruleRes.data?.enabled) };
   });
@@ -93,20 +93,20 @@ export const convertGamePoints = createServerFn({ method: "POST" })
     const [attemptsRes, ledgerRes] = await Promise.all([
       db
         .from("game_attempts")
-        .select("id, score")
+        .select("id, score, correct")
         .eq("user_id", context.userId)
         .order("created_at", { ascending: false })
         .limit(300),
       db.from("exp_ledger").select("ref").eq("user_id", context.userId).eq("reason", "game_point").limit(2000),
     ]);
     const done = new Set((ledgerRes.data ?? []).map((l) => l.ref));
-    const pending = (attemptsRes.data ?? []).filter((a) => !done.has(a.id) && a.score > 0);
+    const pending = (attemptsRes.data ?? []).filter((a) => !done.has(a.id) && (a.correct ?? 0) > 0);
     if (!pending.length) return { gained: 0, points: 0 };
     let gained = 0;
     let points = 0;
     for (const a of pending) {
-      gained += await addExp(db, context.userId, rule.exp * a.score, "game_point", a.id);
-      points += a.score;
+      gained += await addExp(db, context.userId, rule.exp * (a.correct ?? 0), "game_point", a.id);
+      points += a.correct ?? 0;
     }
     if (gained)
       await db.from("activity_logs").insert({

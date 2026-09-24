@@ -208,7 +208,7 @@ function GamePointsCard() {
   const run = useMutation({
     mutationFn: () => convert({ data: {} as never }),
     onSuccess: (res) => {
-      toast.success(res.gained ? `${res.points} points turned into ${res.gained} EXP` : "No new points to convert");
+      toast.success(res.gained ? `${res.points} correct answers turned into ${res.gained} EXP` : "No new points to convert");
       qc.invalidateQueries({ queryKey: ["game-points"] });
       qc.invalidateQueries({ queryKey: ["exp-store"] });
       qc.invalidateQueries({ queryKey: ["my-exp"] });
@@ -228,7 +228,7 @@ function GamePointsCard() {
           <div>
             <p className="font-medium">Game points</p>
             <p className="text-sm text-muted-foreground">
-              {data.points} points ready · {data.rate} EXP per point
+              {data.points} correct answers ready · {data.rate} EXP per correct answer
             </p>
           </div>
         </div>
