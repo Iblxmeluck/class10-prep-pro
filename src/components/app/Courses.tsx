@@ -8,11 +8,13 @@ import {
   CheckCircle2,
   Circle,
   ImageIcon,
+  Lock,
   Play,
   Plus,
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { useSessionInfo } from "@/hooks/useSession";
 import { SubjectChapterPicker } from "@/components/app/SubjectChapterPicker";
@@ -142,6 +144,23 @@ export function Courses() {
   const lessons = useLessons(list.map((c) => c.id));
   const progress = useMyProgress();
   const [openId, setOpenId] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  /** Courses an admin put in the EXP Store that this member hasn't bought yet. */
+  const locks = useQuery({
+    queryKey: ["course-locks"],
+    queryFn: async () => {
+      const [items, purchases] = await Promise.all([
+        supabase.from("store_items").select("id, course_id, exp_price").eq("is_active", true).not("course_id", "is", null),
+        supabase.from("store_purchases").select("item_id"),
+      ]);
+      const owned = new Set((purchases.data ?? []).map((p) => p.item_id));
+      const m = new Map<string, number>();
+      for (const i of items.data ?? []) if (i.course_id && !owned.has(i.id)) m.set(i.course_id, i.exp_price);
+      return m;
+    },
+  });
+  const lockedPrice = (id: string) => (isAdmin ? undefined : locks.data?.get(id));
 
   const lessonsByCourse = useMemo(() => {
     const m = new Map<string, Lesson[]>();
@@ -149,7 +168,8 @@ export function Courses() {
     return m;
   }, [lessons.data]);
 
-  const open = list.find((c) => c.id === openId);
+  const openCandidate = list.find((c) => c.id === openId);
+  const open = openCandidate && lockedPrice(openCandidate.id) === undefined ? openCandidate : undefined;
   if (open)
     return (
       <CourseDetail
@@ -176,11 +196,17 @@ export function Courses() {
             const ls = lessonsByCourse.get(c.id) ?? [];
             const doneCount = ls.filter((l) => (progress.data ?? []).includes(l.id)).length;
             const pct = ls.length ? Math.round((doneCount / ls.length) * 100) : 0;
+            const price = lockedPrice(c.id);
             return (
               <button
                 key={c.id}
                 type="button"
-                onClick={() => setOpenId(c.id)}
+                onClick={() => {
+                  if (price !== undefined) {
+                    toast.info(`Unlock this course for ${price} EXP in the EXP Store`);
+                    void navigate({ to: "/store" });
+                  } else setOpenId(c.id);
+                }}
                 className="overflow-hidden rounded-2xl border border-border bg-card text-left transition-colors hover:border-primary"
               >
                 <Thumb path={c.thumbnail_url} className="h-36 w-full" />
@@ -193,6 +219,11 @@ export function Courses() {
                     <BookOpen className="h-3.5 w-3.5" /> {ls.length} lesson{ls.length === 1 ? "" : "s"}
                     {!c.is_published && <span className="text-[oklch(0.7_0.19_45)]">· Draft</span>}
                   </p>
+                  {price !== undefined && (
+                    <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-primary">
+                      <Lock className="h-3.5 w-3.5" /> Locked · {price} EXP — tap to unlock
+                    </p>
+                  )}
                   <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-muted">
                     <div className="h-full rounded-full bg-primary transition-all" style={{ width: `${pct}%` }} />
                   </div>
