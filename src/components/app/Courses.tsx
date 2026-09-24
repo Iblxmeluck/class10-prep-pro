@@ -15,6 +15,7 @@ import {
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSessionInfo } from "@/hooks/useSession";
+import { SubjectChapterPicker } from "@/components/app/SubjectChapterPicker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -333,6 +334,8 @@ function CourseAdmin({
   const [file, setFile] = useState<File | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
   const [lessonDraft, setLessonDraft] = useState({ title: "", info: "", link_id: "", video_url: "" });
+  const [fillSubject, setFillSubject] = useState<string | undefined>(undefined);
+  const [fillChapter, setFillChapter] = useState<string | undefined>(undefined);
 
   const refresh = () => {
     void qc.invalidateQueries({ queryKey: ["courses"] });
@@ -439,6 +442,37 @@ function CourseAdmin({
     onError: (e: Error) => toast.error(e.message),
   });
 
+  const autoFill = useMutation({
+    mutationFn: async (courseId: string) => {
+      if (!fillSubject) throw new Error("Choose a subject first");
+      let q = supabase.from("links").select("id, title, description").eq("kind", "video").eq("subject_id", fillSubject);
+      if (fillChapter) q = q.eq("chapter_id", fillChapter);
+      const { data, error } = await q.order("created_at");
+      if (error) throw new Error(error.message);
+      const existing = lessonsByCourse.get(courseId) ?? [];
+      const have = new Set(existing.map((l) => l.link_id).filter(Boolean));
+      const fresh = (data ?? []).filter((v) => !have.has(v.id));
+      if (fresh.length === 0) return 0;
+      const start = existing.length;
+      const { error: insErr } = await supabase.from("course_lessons").insert(
+        fresh.map((v, i) => ({
+          course_id: courseId,
+          title: v.title,
+          info: v.description ?? "",
+          position: start + i,
+          link_id: v.id,
+        })),
+      );
+      if (insErr) throw new Error(insErr.message);
+      return fresh.length;
+    },
+    onSuccess: (n) => {
+      toast.success(n ? `Added ${n} video${n === 1 ? "" : "s"}` : "No new videos found for this selection");
+      refresh();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
   const editing = courses.find((c) => c.id === editId) ?? null;
   const editingLessons = editing ? (lessonsByCourse.get(editing.id) ?? []) : [];
 
@@ -540,6 +574,27 @@ function CourseAdmin({
             </label>
             <Button variant="destructive" size="sm" onClick={() => removeCourse.mutate(editing.id)}>
               <Trash2 className="mr-1.5 h-4 w-4" /> Delete course
+            </Button>
+          </div>
+
+          <div className="space-y-2 rounded-lg border border-dashed border-border p-3">
+            <p className="font-display text-sm font-semibold">Auto-fill from video resources (optional)</p>
+            <SubjectChapterPicker
+              subjectId={fillSubject}
+              chapterId={fillChapter}
+              onSubjectChange={(id) => {
+                setFillSubject(id);
+                setFillChapter(undefined);
+              }}
+              onChapterChange={setFillChapter}
+            />
+            <Button
+              size="sm"
+              variant="secondary"
+              disabled={!fillSubject || autoFill.isPending}
+              onClick={() => autoFill.mutate(editing.id)}
+            >
+              <Play className="mr-1.5 h-4 w-4" /> {autoFill.isPending ? "Adding…" : "Add matching videos"}
             </Button>
           </div>
 
