@@ -33,6 +33,25 @@ function fmt(date: string) {
   return new Date(`${date}T00:00:00`).toLocaleDateString(undefined, { day: "numeric", month: "short" });
 }
 
+const TASK_TITLE: Record<string, (n: string) => string> = {
+  video: (n) => `Watch video of ${n}`,
+  note: (n) => `Learn ${n} notes`,
+  quiz: (n) => `Take test of ${n}`,
+  resource: (n) => `Study PDFs & images of ${n}`,
+  flashcards: (n) => `Revise flashcards of ${n}`,
+  questions: (n) => `Practice questions of ${n}`,
+};
+const KIND_ORDER = ["video", "note", "resource", "flashcards", "questions", "quiz"];
+
+function chapterTasks(c: Chap): { title: string; res: Res[] }[] {
+  const kinds = KIND_ORDER.filter((k) => c.res.some((r) => r.kind === k));
+  if (!kinds.length) return [{ title: `Study ${c.name}`, res: [] }];
+  return kinds.map((k) => ({
+    title: (TASK_TITLE[k] ?? ((n: string) => `${k}: ${n}`))(c.name),
+    res: c.res.filter((r) => r.kind === k),
+  }));
+}
+
 export function AutoPlanButton({ event }: { event: EventRow }) {
   const qc = useQueryClient();
   const [loading, setLoading] = useState(false);
