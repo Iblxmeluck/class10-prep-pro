@@ -128,24 +128,28 @@ export function AutoPlanButton({ event }: { event: EventRow }) {
         const { data: cur } = await supabase.from("event_tasks").select("sort_order").eq("day_id", dayId);
         let order = (cur ?? []).reduce((m, t) => Math.max(m, t.sort_order), 0);
         for (const t of d.tasks) {
-          const names = t.chapters.map((c) => c.name);
-          const { data: task, error } = await supabase
-            .from("event_tasks")
-            .insert({
-              day_id: dayId,
-              title: `${t.subjectName}: Complete ${names.join(", ")}`,
-              instructions: `Study these chapters:\n${names.map((n) => `• ${n}`).join("\n")}`,
-              subject_id: t.subjectId,
-              chapter_id: t.chapters.length === 1 ? (t.chapters[0]?.id ?? null) : null,
-              sort_order: ++order,
-            })
-            .select("id")
-            .single();
-          if (error) throw new Error(error.message);
-          const res = t.chapters.flatMap((c) => c.res.map((r) => ({ task_id: task.id, ...r })));
-          if (res.length) {
-            const { error: re } = await supabase.from("event_task_resources").insert(res);
-            if (re) throw new Error(re.message);
+          for (const c of t.chapters) {
+            for (const ct of chapterTasks(c)) {
+              const { data: task, error } = await supabase
+                .from("event_tasks")
+                .insert({
+                  day_id: dayId,
+                  title: ct.title,
+                  instructions: `${t.subjectName} — ${c.name}`,
+                  subject_id: t.subjectId,
+                  chapter_id: c.id,
+                  sort_order: ++order,
+                })
+                .select("id")
+                .single();
+              if (error) throw new Error(error.message);
+              if (ct.res.length) {
+                const { error: re } = await supabase
+                  .from("event_task_resources")
+                  .insert(ct.res.map((r) => ({ task_id: task.id, ...r })));
+                if (re) throw new Error(re.message);
+              }
+            }
           }
         }
       }
@@ -175,24 +179,23 @@ export function AutoPlanButton({ event }: { event: EventRow }) {
                 <p className="font-semibold">
                   Day {d.dayNumber} — {fmt(d.date)}
                 </p>
-                {d.tasks.map((t) => {
-                  const kinds = [...new Set(t.chapters.flatMap((c) => c.res.map((r) => r.kind)))];
-                  return (
-                    <div key={t.subjectId} className="mt-2 text-sm">
-                      <p className="font-medium">{t.subjectName}</p>
-                      <p className="text-muted-foreground">{t.chapters.map((c) => c.name).join(", ")}</p>
-                      {kinds.length > 0 && (
-                        <ul className="mt-1 flex flex-wrap gap-x-3 gap-y-1">
-                          {kinds.map((k) => (
-                            <li key={k} className="flex items-center gap-1 text-primary">
-                              <Check className="h-3.5 w-3.5" /> {KIND_LABEL[k] ?? k}
+                {d.tasks.map((t) => (
+                  <div key={t.subjectId} className="mt-2 text-sm">
+                    <p className="font-medium">{t.subjectName}</p>
+                    {t.chapters.map((c) => (
+                      <div key={c.id} className="mt-1 pl-2">
+                        <p className="text-muted-foreground">{c.name}</p>
+                        <ul className="mt-0.5 space-y-0.5">
+                          {chapterTasks(c).map((ct) => (
+                            <li key={ct.title} className="flex items-center gap-1 text-primary">
+                              <Check className="h-3.5 w-3.5 shrink-0" /> {ct.title}
                             </li>
                           ))}
                         </ul>
-                      )}
-                    </div>
-                  );
-                })}
+                      </div>
+                    ))}
+                  </div>
+                ))}
               </div>
             ))}
           </div>
