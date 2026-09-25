@@ -136,7 +136,7 @@ export function AutoPlanButton({ event }: { event: EventRow }) {
               title: `${t.subjectName}: Complete ${names.join(", ")}`,
               instructions: `Study these chapters:\n${names.map((n) => `• ${n}`).join("\n")}`,
               subject_id: t.subjectId,
-              chapter_id: t.chapters.length === 1 ? t.chapters[0].id : null,
+              chapter_id: t.chapters.length === 1 ? (t.chapters[0]?.id ?? null) : null,
               sort_order: ++order,
             })
             .select("id")
