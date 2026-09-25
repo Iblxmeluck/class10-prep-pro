@@ -15,6 +15,7 @@ import { Badge } from "@/components/ui/badge";
 import { useSubjects, useChapters } from "@/components/app/SubjectChapterPicker";
 import { useTopics } from "@/components/app/TopicSelect";
 import { RESOURCE_KINDS, dayDateFor, useEventPlan } from "@/components/app/EventPrep";
+import { AutoPlanButton } from "@/components/app/AutoPlan";
 
 export const Route = createFileRoute("/_authenticated/admin/events")({
   head: () => ({
@@ -344,11 +345,14 @@ function PlanBuilder({ event }: { event: EventRow }) {
 
   return (
     <Card>
-      <CardHeader className="flex-row items-center justify-between gap-2 space-y-0">
+      <CardHeader className="flex-row flex-wrap items-center justify-between gap-2 space-y-0">
         <CardTitle className="text-base">Daily plan · {total} days</CardTitle>
-        <Button size="sm" onClick={() => generate.mutate()} disabled={generate.isPending}>
-          <Plus className="mr-1.5 h-4 w-4" /> Create Day 1…{total}
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button size="sm" variant="outline" onClick={() => generate.mutate()} disabled={generate.isPending}>
+            <Plus className="mr-1.5 h-4 w-4" /> Manual Plan (Day 1…{total})
+          </Button>
+          <AutoPlanButton event={event} />
+        </div>
       </CardHeader>
       <CardContent className="space-y-4">
         {!days.length && <p className="text-sm text-muted-foreground">No days yet — create them to start planning.</p>}
