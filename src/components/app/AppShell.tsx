@@ -45,7 +45,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <span className="study-blob study-blob-c" />
         <img src={pandaImg} alt="" width={360} height={360} decoding="async" loading="lazy" className="study-panda" />
       </div>
-      <div className="relative z-[1] flex min-h-screen w-full bg-background">
+      <div className="relative z-[1] flex min-h-screen w-full">
         <AppSidebar />
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b border-border bg-card/80 px-3 backdrop-blur sm:px-4">
