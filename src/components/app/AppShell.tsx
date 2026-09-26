@@ -2,6 +2,7 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { GraduationCap, LogOut, Settings as SettingsIcon, Trophy, User } from "lucide-react";
 import type { ReactNode } from "react";
+import pandaImg from "@/assets/panda.webp";
 import { supabase } from "@/integrations/supabase/client";
 import { useSessionInfo } from "@/hooks/useSession";
 import { Button } from "@/components/ui/button";
@@ -38,7 +39,13 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <SidebarProvider>
       <StudyTimer />
-      <div className="flex min-h-screen w-full bg-background">
+      <div aria-hidden className="study-bg pointer-events-none fixed inset-0 -z-0 overflow-hidden">
+        <span className="study-blob study-blob-a" />
+        <span className="study-blob study-blob-b" />
+        <span className="study-blob study-blob-c" />
+        <img src={pandaImg} alt="" width={360} height={360} decoding="async" loading="lazy" className="study-panda" />
+      </div>
+      <div className="relative z-[1] flex min-h-screen w-full bg-background">
         <AppSidebar />
         <div className="flex min-w-0 flex-1 flex-col">
           <header className="sticky top-0 z-30 flex h-16 items-center gap-2 border-b border-border bg-card/80 px-3 backdrop-blur sm:px-4">
