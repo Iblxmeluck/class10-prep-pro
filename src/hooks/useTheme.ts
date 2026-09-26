@@ -5,7 +5,6 @@ export type Theme = "neon" | "default" | "light" | "nordic" | "cosmic";
 const KEY = "app-theme";
 
 export const THEMES: { value: Theme; label: string; emoji: string }[] = [
-  { value: "neon", label: "Neon Academic", emoji: "⚡" },
   { value: "default", label: "Aurora", emoji: "🌈" },
   { value: "light", label: "White", emoji: "☀️" },
   { value: "nordic", label: "Soft Pastel 3D", emoji: "🍑" },
@@ -29,7 +28,7 @@ export function applyTheme(theme: Theme) {
 }
 
 export function useTheme() {
-  const [theme, setThemeState] = useState<Theme>("neon");
+  const [theme, setThemeState] = useState<Theme>("nordic");
 
   useEffect(() => {
     let stored: string | null = null;
@@ -38,7 +37,7 @@ export function useTheme() {
     } catch {
       stored = null;
     }
-    const initial: Theme = isTheme(stored) ? stored : "neon";
+    const initial: Theme = isTheme(stored) && stored !== "neon" ? stored : "nordic";
     setThemeState(initial);
     applyTheme(initial);
   }, []);
