@@ -8,7 +8,7 @@ export const THEMES: { value: Theme; label: string; emoji: string }[] = [
   { value: "neon", label: "Neon Academic", emoji: "⚡" },
   { value: "default", label: "Aurora", emoji: "🌈" },
   { value: "light", label: "White", emoji: "☀️" },
-  { value: "nordic", label: "Nordic", emoji: "🌲" },
+  { value: "nordic", label: "Soft Pastel 3D", emoji: "🍑" },
   { value: "cosmic", label: "Cosmic", emoji: "🌌" },
 ];
 
@@ -20,7 +20,7 @@ export function applyTheme(theme: Theme) {
   const root = document.documentElement;
   root.classList.remove("theme-neon", "theme-default", "theme-light", "theme-nordic", "theme-cosmic");
   root.classList.add(`theme-${theme}`);
-  root.classList.toggle("dark", theme !== "light");
+  root.classList.toggle("dark", theme !== "light" && theme !== "nordic");
   try {
     localStorage.setItem(KEY, theme);
   } catch {

@@ -105,7 +105,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   errorComponent: ErrorComponent,
 });
 
-const themeBootstrap = `try{var t=localStorage.getItem('app-theme');if(t!=='neon'&&t!=='default'&&t!=='light'&&t!=='nordic'&&t!=='cosmic')t='neon';var c=document.documentElement.classList;c.add('theme-'+t);c.toggle('dark',t!=='light')}catch(e){document.documentElement.classList.add('theme-neon')}`;
+const themeBootstrap = `try{var t=localStorage.getItem('app-theme');if(t!=='neon'&&t!=='default'&&t!=='light'&&t!=='nordic'&&t!=='cosmic')t='neon';var c=document.documentElement.classList;c.add('theme-'+t);c.toggle('dark',t!=='light'&&t!=='nordic')}catch(e){document.documentElement.classList.add('theme-neon')}`;
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
