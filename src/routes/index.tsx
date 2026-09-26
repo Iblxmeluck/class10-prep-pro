@@ -31,13 +31,7 @@ import { getLandingStats } from "@/lib/landing.functions";
 import heroImage from "@/assets/landing-hero.jpg";
 
 export const Route = createFileRoute("/")({
-  loader: async () => {
-    try {
-      return await getLandingStats();
-    } catch {
-      return { questions: 0, testsAndQuizzes: 0, flashcards: 0, resources: 0 } as Awaited<ReturnType<typeof getLandingStats>>;
-    }
-  },
+  loader: () => getLandingStats(),
   head: () => ({
     meta: [
       { title: "Class 10 Study Hub — CBSE Class 10 Preparation, All in One Place" },
