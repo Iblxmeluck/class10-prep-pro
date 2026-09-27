@@ -22,7 +22,9 @@ import { Route as AuthenticatedDownloadsRouteImport } from './routes/_authentica
 import { Route as AuthenticatedEmergencyRouteImport } from './routes/_authenticated/emergency'
 import { Route as AuthenticatedFlashcardsRouteImport } from './routes/_authenticated/flashcards'
 import { Route as AuthenticatedGamesRouteImport } from './routes/_authenticated/games'
+import { Route as AuthenticatedLeaderboardRouteImport } from './routes/_authenticated/leaderboard'
 import { Route as AuthenticatedMemoryRouteImport } from './routes/_authenticated/memory'
+import { Route as AuthenticatedMistakesRouteImport } from './routes/_authenticated/mistakes'
 import { Route as AuthenticatedNotesRouteImport } from './routes/_authenticated/notes'
 import { Route as AuthenticatedPracticeRouteImport } from './routes/_authenticated/practice'
 import { Route as AuthenticatedQuizzesRouteImport } from './routes/_authenticated/quizzes'
@@ -115,9 +117,20 @@ const AuthenticatedGamesRoute = AuthenticatedGamesRouteImport.update({
   path: '/games',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedLeaderboardRoute =
+  AuthenticatedLeaderboardRouteImport.update({
+    id: '/leaderboard',
+    path: '/leaderboard',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedMemoryRoute = AuthenticatedMemoryRouteImport.update({
   id: '/memory',
   path: '/memory',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMistakesRoute = AuthenticatedMistakesRouteImport.update({
+  id: '/mistakes',
+  path: '/mistakes',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedNotesRoute = AuthenticatedNotesRouteImport.update({
@@ -278,7 +291,9 @@ export interface FileRoutesByFullPath {
   '/emergency': typeof AuthenticatedEmergencyRoute
   '/flashcards': typeof AuthenticatedFlashcardsRoute
   '/games': typeof AuthenticatedGamesRoute
+  '/leaderboard': typeof AuthenticatedLeaderboardRoute
   '/memory': typeof AuthenticatedMemoryRoute
+  '/mistakes': typeof AuthenticatedMistakesRoute
   '/notes': typeof AuthenticatedNotesRoute
   '/practice': typeof AuthenticatedPracticeRoute
   '/quizzes': typeof AuthenticatedQuizzesRoute
@@ -318,7 +333,9 @@ export interface FileRoutesByTo {
   '/emergency': typeof AuthenticatedEmergencyRoute
   '/flashcards': typeof AuthenticatedFlashcardsRoute
   '/games': typeof AuthenticatedGamesRoute
+  '/leaderboard': typeof AuthenticatedLeaderboardRoute
   '/memory': typeof AuthenticatedMemoryRoute
+  '/mistakes': typeof AuthenticatedMistakesRoute
   '/notes': typeof AuthenticatedNotesRoute
   '/practice': typeof AuthenticatedPracticeRoute
   '/quizzes': typeof AuthenticatedQuizzesRoute
@@ -361,7 +378,9 @@ export interface FileRoutesById {
   '/_authenticated/emergency': typeof AuthenticatedEmergencyRoute
   '/_authenticated/flashcards': typeof AuthenticatedFlashcardsRoute
   '/_authenticated/games': typeof AuthenticatedGamesRoute
+  '/_authenticated/leaderboard': typeof AuthenticatedLeaderboardRoute
   '/_authenticated/memory': typeof AuthenticatedMemoryRoute
+  '/_authenticated/mistakes': typeof AuthenticatedMistakesRoute
   '/_authenticated/notes': typeof AuthenticatedNotesRoute
   '/_authenticated/practice': typeof AuthenticatedPracticeRoute
   '/_authenticated/quizzes': typeof AuthenticatedQuizzesRoute
@@ -404,7 +423,9 @@ export interface FileRouteTypes {
     | '/emergency'
     | '/flashcards'
     | '/games'
+    | '/leaderboard'
     | '/memory'
+    | '/mistakes'
     | '/notes'
     | '/practice'
     | '/quizzes'
@@ -444,7 +465,9 @@ export interface FileRouteTypes {
     | '/emergency'
     | '/flashcards'
     | '/games'
+    | '/leaderboard'
     | '/memory'
+    | '/mistakes'
     | '/notes'
     | '/practice'
     | '/quizzes'
@@ -486,7 +509,9 @@ export interface FileRouteTypes {
     | '/_authenticated/emergency'
     | '/_authenticated/flashcards'
     | '/_authenticated/games'
+    | '/_authenticated/leaderboard'
     | '/_authenticated/memory'
+    | '/_authenticated/mistakes'
     | '/_authenticated/notes'
     | '/_authenticated/practice'
     | '/_authenticated/quizzes'
@@ -614,11 +639,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedGamesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/leaderboard': {
+      id: '/_authenticated/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/leaderboard'
+      preLoaderRoute: typeof AuthenticatedLeaderboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/memory': {
       id: '/_authenticated/memory'
       path: '/memory'
       fullPath: '/memory'
       preLoaderRoute: typeof AuthenticatedMemoryRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/mistakes': {
+      id: '/_authenticated/mistakes'
+      path: '/mistakes'
+      fullPath: '/mistakes'
+      preLoaderRoute: typeof AuthenticatedMistakesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/notes': {
@@ -855,7 +894,9 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedEmergencyRoute: typeof AuthenticatedEmergencyRoute
   AuthenticatedFlashcardsRoute: typeof AuthenticatedFlashcardsRoute
   AuthenticatedGamesRoute: typeof AuthenticatedGamesRoute
+  AuthenticatedLeaderboardRoute: typeof AuthenticatedLeaderboardRoute
   AuthenticatedMemoryRoute: typeof AuthenticatedMemoryRoute
+  AuthenticatedMistakesRoute: typeof AuthenticatedMistakesRoute
   AuthenticatedNotesRoute: typeof AuthenticatedNotesRoute
   AuthenticatedPracticeRoute: typeof AuthenticatedPracticeRoute
   AuthenticatedQuizzesRoute: typeof AuthenticatedQuizzesRoute
@@ -882,7 +923,9 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedEmergencyRoute: AuthenticatedEmergencyRoute,
   AuthenticatedFlashcardsRoute: AuthenticatedFlashcardsRoute,
   AuthenticatedGamesRoute: AuthenticatedGamesRoute,
+  AuthenticatedLeaderboardRoute: AuthenticatedLeaderboardRoute,
   AuthenticatedMemoryRoute: AuthenticatedMemoryRoute,
+  AuthenticatedMistakesRoute: AuthenticatedMistakesRoute,
   AuthenticatedNotesRoute: AuthenticatedNotesRoute,
   AuthenticatedPracticeRoute: AuthenticatedPracticeRoute,
   AuthenticatedQuizzesRoute: AuthenticatedQuizzesRoute,
