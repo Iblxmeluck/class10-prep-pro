@@ -1,0 +1,1 @@
+REVOKE ALL ON FUNCTION public.track_mistake() FROM public, anon, authenticated;

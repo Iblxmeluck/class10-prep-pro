@@ -1030,6 +1030,27 @@ export type Database = {
         }
         Relationships: []
       }
+      leaderboard_prefs: {
+        Row: {
+          nickname: string
+          opt_out: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          nickname?: string
+          opt_out?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          nickname?: string
+          opt_out?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       links: {
         Row: {
           chapter_id: string | null
@@ -1196,6 +1217,44 @@ export type Database = {
             columns: ["subject_id"]
             isOneToOne: false
             referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mistake_notebook: {
+        Row: {
+          created_at: string
+          last_wrong_at: string
+          question_id: string
+          resolved_at: string | null
+          source: string
+          user_id: string
+          wrong_count: number
+        }
+        Insert: {
+          created_at?: string
+          last_wrong_at?: string
+          question_id: string
+          resolved_at?: string | null
+          source?: string
+          user_id: string
+          wrong_count?: number
+        }
+        Update: {
+          created_at?: string
+          last_wrong_at?: string
+          question_id?: string
+          resolved_at?: string | null
+          source?: string
+          user_id?: string
+          wrong_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mistake_notebook_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
             referencedColumns: ["id"]
           },
         ]
@@ -2149,6 +2208,15 @@ export type Database = {
       purchase_exp_course: { Args: { _course: string }; Returns: Json }
       study_heartbeat: { Args: { _active: boolean }; Returns: undefined }
       touch_last_login: { Args: never; Returns: undefined }
+      weekly_leaderboard: {
+        Args: never
+        Returns: {
+          exp: number
+          is_me: boolean
+          name: string
+          rank: number
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "member"
