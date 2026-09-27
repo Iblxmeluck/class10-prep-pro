@@ -24,11 +24,30 @@ export const Route = createFileRoute("/_authenticated/leaderboard")({
   component: Leaderboard,
 });
 
+type Metric = "exp" | "correct" | "attempted" | "accuracy" | "study" | "quizzes";
+const METRICS: { id: Metric; label: string; hint: string }[] = [
+  { id: "exp", label: "🌟 EXP", hint: "EXP earned since Monday." },
+  { id: "correct", label: "🎯 Correct", hint: "Correct answers since Monday." },
+  { id: "attempted", label: "📝 Attempted", hint: "Questions answered since Monday." },
+  { id: "accuracy", label: "💯 Accuracy", hint: "% correct this week (min. 20 questions to qualify)." },
+  { id: "study", label: "⏱️ Study time", hint: "Time on the study timer since Monday." },
+  { id: "quizzes", label: "🏆 Quizzes & tests", hint: "Quizzes and tests completed since Monday." },
+];
+function fmtValue(m: Metric, v: number) {
+  if (m === "exp") return `${v} EXP`;
+  if (m === "accuracy") return `${v}%`;
+  if (m === "study") { const h = Math.floor(v / 3600), mm = Math.floor((v % 3600) / 60); return h ? `${h}h ${mm}m` : `${mm}m`; }
+  if (m === "correct") return `${v} correct`;
+  if (m === "attempted") return `${v} answered`;
+  return `${v} done`;
+}
+
 function Leaderboard() {
   const load = useServerFn(getLeaderboard);
   const save = useServerFn(saveLeaderboardPrefs);
   const qc = useQueryClient();
-  const { data, isLoading } = useQuery({ queryKey: ["leaderboard"], queryFn: () => load() });
+  const [metric, setMetric] = useState<Metric>("exp");
+  const { data, isLoading } = useQuery({ queryKey: ["leaderboard", metric], queryFn: () => load({ data: { metric } }) });
   const [nick, setNick] = useState("");
   const [optOut, setOptOut] = useState(false);
   useEffect(() => { if (data) { setNick(data.prefs.nickname); setOptOut(data.prefs.optOut); } }, [data]);
@@ -42,11 +61,18 @@ function Leaderboard() {
     <div className="mx-auto max-w-2xl space-y-5">
       <div>
         <h1 className="flex items-center gap-2 font-display text-2xl font-semibold"><Crown className="h-6 w-6" /> Weekly leaderboard</h1>
-        <p className="mt-1 text-sm text-muted-foreground">EXP earned since Monday. Resets every week.</p>
+        <p className="mt-1 text-sm text-muted-foreground">{METRICS.find((m) => m.id === metric)?.hint} Resets every Monday.</p>
+      </div>
+      <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+        {METRICS.map((m) => (
+          <Button key={m.id} size="sm" variant={metric === m.id ? "default" : "outline"} className="shrink-0 rounded-full" onClick={() => setMetric(m.id)}>
+            {m.label}
+          </Button>
+        ))}
       </div>
       <div className="space-y-3 rounded-2xl border border-border bg-card p-4">
         <div className="flex items-center justify-between gap-3">
-          <div><p className="text-sm font-medium">Hide me from the leaderboard</p><p className="text-xs text-muted-foreground">Others won't see your name or EXP.</p></div>
+          <div><p className="text-sm font-medium">Hide me from the leaderboard</p><p className="text-xs text-muted-foreground">Others won't see your name or scores.</p></div>
           <Switch checked={optOut} onCheckedChange={(v) => { setOptOut(v); void persist(v, nick); }} />
         </div>
         <div className="flex gap-2">
@@ -55,14 +81,14 @@ function Leaderboard() {
         </div>
       </div>
       {isLoading ? <p className="text-sm text-muted-foreground">Loading…</p> : !data?.rows.length ? (
-        <div className="rounded-2xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">No EXP earned yet this week. Be the first!</div>
+        <div className="rounded-2xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground">No one on this board yet this week. Be the first!</div>
       ) : (
         <ol className="grid gap-2">
           {data.rows.map((r, k) => (
             <li key={k} className={cn("flex items-center gap-3 rounded-xl border border-border bg-card p-3", r.is_me && "border-primary bg-primary/10")}>
               <span className="w-8 text-center font-display font-semibold">{Number(r.rank) <= 3 ? <Medal className="mx-auto h-5 w-5 text-primary" /> : r.rank}</span>
               <span className="flex-1 truncate font-medium">{r.name}{r.is_me ? " (you)" : ""}</span>
-              <span className="font-display font-semibold">{r.exp} EXP</span>
+              <span className="font-display font-semibold">{fmtValue(metric, r.value)}</span>
             </li>
           ))}
         </ol>

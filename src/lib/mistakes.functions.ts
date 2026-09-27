@@ -49,14 +49,23 @@ export const removeMistake = createServerFn({ method: "POST" })
 
 export const getLeaderboard = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
+  .inputValidator((d: unknown) =>
+    z.object({ metric: z.enum(["exp", "correct", "attempted", "accuracy", "study", "quizzes"]).default("exp") })
+      .parse(d ?? {}),
+  )
+  .handler(async ({ data, context }) => {
     const { supabase, userId } = context;
+    const rpc = data.metric === "exp"
+      ? supabase.rpc("weekly_leaderboard" as never)
+      : supabase.rpc("weekly_leaderboard_metric" as never, { _metric: data.metric } as never);
     const [{ data: rows }, { data: prefs }] = await Promise.all([
-      supabase.rpc("weekly_leaderboard" as never),
+      rpc,
       supabase.from("leaderboard_prefs").select("opt_out, nickname").eq("user_id", userId).maybeSingle(),
     ]);
+    const list = ((rows ?? []) as unknown as { rank: number; name: string; exp?: number; value?: number; is_me: boolean }[])
+      .map((r) => ({ rank: r.rank, name: r.name, is_me: r.is_me, value: Number(r.value ?? r.exp ?? 0) }));
     return {
-      rows: (rows ?? []) as unknown as { rank: number; name: string; exp: number; is_me: boolean }[],
+      rows: list,
       prefs: { optOut: prefs?.opt_out ?? false, nickname: prefs?.nickname ?? "" },
     };
   });
