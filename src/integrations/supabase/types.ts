@@ -2217,6 +2217,15 @@ export type Database = {
           rank: number
         }[]
       }
+      weekly_leaderboard_metric: {
+        Args: { _metric: string }
+        Returns: {
+          is_me: boolean
+          name: string
+          rank: number
+          value: number
+        }[]
+      }
     }
     Enums: {
       app_role: "admin" | "member"
