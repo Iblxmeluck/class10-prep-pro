@@ -93,6 +93,8 @@ function buildSections(isAdmin: boolean): Section[] {
           ],
         },
         { to: "/emergency", label: "Exam Emergency", icon: Siren },
+        { to: "/mistakes", label: "Weak Spots notebook", icon: NotebookPen },
+        { to: "/leaderboard", label: "Weekly leaderboard", icon: Sparkles },
         { to: "/admin/events", label: "Events", icon: CalendarDays, adminOnly: true },
       ],
     },
