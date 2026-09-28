@@ -12,6 +12,8 @@ import {
   resetMemberPassword,
   saveMemberPermissions,
   setMemberActive,
+  reduceMemberExp,
+  setLeaderboardHidden,
 } from "@/lib/admin.functions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -244,6 +246,7 @@ export function MemberRow({
 
       {open && (
         <CardContent className="space-y-6">
+          <MemberExpControls member={member} onChanged={onChanged} />
           <section className="space-y-2">
             <h3 className="text-sm font-semibold">Subjects</h3>
             <div className="flex flex-wrap gap-3">
@@ -360,5 +363,36 @@ export function MemberRow({
         </CardContent>
       )}
     </Card>
+  );
+}
+
+function MemberExpControls({ member, onChanged }: { member: Member; onChanged: () => void }) {
+  const reduce = useServerFn(reduceMemberExp);
+  const hide = useServerFn(setLeaderboardHidden);
+  const [amount, setAmount] = useState("");
+  const [busy, setBusy] = useState(false);
+  async function run(fn: () => Promise<unknown>, msg: string) {
+    setBusy(true);
+    try { await fn(); toast.success(msg); onChanged(); }
+    catch (e) { toast.error(e instanceof Error ? e.message : "Something went wrong"); }
+    finally { setBusy(false); }
+  }
+  return (
+    <section className="space-y-3 rounded-xl border border-border p-3">
+      <h3 className="text-sm font-semibold">EXP & leaderboard</h3>
+      <p className="text-sm">Current EXP: <span className="font-semibold">{member.expBalance}</span></p>
+      <div className="flex flex-wrap gap-2">
+        <Input type="number" min={1} placeholder="EXP to remove" value={amount} onChange={(e) => setAmount(e.target.value)} className="w-40" />
+        <Button variant="outline" disabled={busy || !(Number(amount) > 0)}
+          onClick={() => void run(() => reduce({ data: { userId: member.id, amount: Math.floor(Number(amount)) } }).then(() => setAmount("")), "EXP reduced")}>
+          Reduce EXP
+        </Button>
+      </div>
+      <label className="flex items-center gap-3 text-sm">
+        <Switch checked={member.leaderboardHidden} disabled={busy}
+          onCheckedChange={(v) => void run(() => hide({ data: { userId: member.id, hidden: v } }), v ? "Hidden from leaderboard" : "Shown on leaderboard")} />
+        Hide from leaderboard
+      </label>
+    </section>
   );
 }

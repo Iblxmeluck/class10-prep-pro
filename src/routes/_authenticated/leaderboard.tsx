@@ -7,7 +7,6 @@ import { toast } from "sonner";
 import { getLeaderboard, saveLeaderboardPrefs } from "@/lib/mistakes.functions";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated/leaderboard")({
@@ -26,7 +25,7 @@ export const Route = createFileRoute("/_authenticated/leaderboard")({
 
 type Metric = "exp" | "correct" | "attempted" | "accuracy" | "study" | "quizzes";
 const METRICS: { id: Metric; label: string; hint: string }[] = [
-  { id: "exp", label: "🌟 EXP", hint: "EXP earned since Monday." },
+  { id: "exp", label: "🌟 EXP", hint: "Current EXP balance." },
   { id: "correct", label: "🎯 Correct", hint: "Correct answers since Monday." },
   { id: "attempted", label: "📝 Attempted", hint: "Questions answered since Monday." },
   { id: "accuracy", label: "💯 Accuracy", hint: "% correct this week (min. 20 questions to qualify)." },
@@ -49,11 +48,10 @@ function Leaderboard() {
   const [metric, setMetric] = useState<Metric>("exp");
   const { data, isLoading } = useQuery({ queryKey: ["leaderboard", metric], queryFn: () => load({ data: { metric } }) });
   const [nick, setNick] = useState("");
-  const [optOut, setOptOut] = useState(false);
-  useEffect(() => { if (data) { setNick(data.prefs.nickname); setOptOut(data.prefs.optOut); } }, [data]);
+  useEffect(() => { if (data) setNick(data.prefs.nickname); }, [data]);
 
-  async function persist(o: boolean, n: string) {
-    try { await save({ data: { optOut: o, nickname: n } }); toast.success("Saved"); void qc.invalidateQueries({ queryKey: ["leaderboard"] }); }
+  async function persist(n: string) {
+    try { await save({ data: { nickname: n } }); toast.success("Saved"); void qc.invalidateQueries({ queryKey: ["leaderboard"] }); }
     catch { toast.error("Could not save"); }
   }
 
@@ -61,7 +59,7 @@ function Leaderboard() {
     <div className="mx-auto max-w-2xl space-y-5">
       <div>
         <h1 className="flex items-center gap-2 font-display text-2xl font-semibold"><Crown className="h-6 w-6" /> Weekly leaderboard</h1>
-        <p className="mt-1 text-sm text-muted-foreground">{METRICS.find((m) => m.id === metric)?.hint} Resets every Monday.</p>
+        <p className="mt-1 text-sm text-muted-foreground">{METRICS.find((m) => m.id === metric)?.hint}{metric === "exp" ? "" : " Resets every Monday."}</p>
       </div>
       <div className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
         {METRICS.map((m) => (
@@ -71,13 +69,9 @@ function Leaderboard() {
         ))}
       </div>
       <div className="space-y-3 rounded-2xl border border-border bg-card p-4">
-        <div className="flex items-center justify-between gap-3">
-          <div><p className="text-sm font-medium">Hide me from the leaderboard</p><p className="text-xs text-muted-foreground">Others won't see your name or scores.</p></div>
-          <Switch checked={optOut} onCheckedChange={(v) => { setOptOut(v); void persist(v, nick); }} />
-        </div>
         <div className="flex gap-2">
           <Input placeholder="Nickname (optional)" maxLength={24} value={nick} onChange={(e) => setNick(e.target.value)} />
-          <Button variant="outline" onClick={() => void persist(optOut, nick)}>Save</Button>
+          <Button variant="outline" onClick={() => void persist(nick)}>Save</Button>
         </div>
       </div>
       {isLoading ? <p className="text-sm text-muted-foreground">Loading…</p> : !data?.rows.length ? (

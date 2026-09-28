@@ -221,6 +221,8 @@ export const listMembers = createServerFn({ method: "GET" })
       { data: subj },
       { data: chap },
       { data: qt },
+      { data: exps },
+      { data: lbp },
     ] = await Promise.all([
       supabaseAdmin.from("profiles").select("id, username, display_name, is_active, created_at").order("created_at"),
       supabaseAdmin.from("user_roles").select("user_id, role"),
@@ -228,6 +230,8 @@ export const listMembers = createServerFn({ method: "GET" })
       supabaseAdmin.from("member_subject_access").select("user_id, subject_id"),
       supabaseAdmin.from("member_chapter_access").select("user_id, chapter_id"),
       supabaseAdmin.from("member_qtype_access").select("user_id, qtype"),
+      supabaseAdmin.from("member_exp").select("user_id, balance"),
+      supabaseAdmin.from("leaderboard_prefs").select("user_id, opt_out"),
     ]);
 
     return (profiles ?? []).map((p) => {
@@ -246,6 +250,8 @@ export const listMembers = createServerFn({ method: "GET" })
         canDownloadPdf: s?.can_download_pdf ?? false,
         canViewImage: s?.can_view_image ?? true,
         canDownloadImage: s?.can_download_image ?? false,
+        expBalance: (exps ?? []).find((x) => x.user_id === p.id)?.balance ?? 0,
+        leaderboardHidden: (lbp ?? []).find((x) => x.user_id === p.id)?.opt_out ?? false,
       };
     });
 
@@ -279,4 +285,44 @@ export const listAdminQuestions = createServerFn({ method: "POST" })
     const { data: rows, error } = await q;
     if (error) throw new Error(error.message);
     return rows ?? [];
+  });
+
+/** Admin removes EXP from a member's balance (never below zero). */
+export const reduceMemberExp = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) =>
+    z.object({ userId: z.string().uuid(), amount: z.number().int().min(1).max(1_000_000) }).parse(d),
+  )
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: row } = await supabaseAdmin
+      .from("member_exp")
+      .select("balance, lifetime")
+      .eq("user_id", data.userId)
+      .maybeSingle();
+    const current = row?.balance ?? 0;
+    const cut = Math.min(current, data.amount);
+    if (!cut) return { balance: current, removed: 0 };
+    const { error } = await supabaseAdmin
+      .from("member_exp")
+      .update({ balance: current - cut, updated_at: new Date().toISOString() })
+      .eq("user_id", data.userId);
+    if (error) throw new Error(error.message);
+    await supabaseAdmin.from("exp_ledger").insert({ user_id: data.userId, delta: -cut, reason: "admin_adjust", ref: context.userId });
+    return { balance: current - cut, removed: cut };
+  });
+
+/** Admin hides or shows a member on the leaderboard. */
+export const setLeaderboardHidden = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d: unknown) => z.object({ userId: z.string().uuid(), hidden: z.boolean() }).parse(d))
+  .handler(async ({ data, context }) => {
+    await assertAdmin(context.supabase, context.userId);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { error } = await supabaseAdmin
+      .from("leaderboard_prefs")
+      .upsert({ user_id: data.userId, opt_out: data.hidden, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
+    if (error) throw new Error(error.message);
+    return { ok: true };
   });

@@ -73,11 +73,11 @@ export const getLeaderboard = createServerFn({ method: "POST" })
 export const saveLeaderboardPrefs = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((d: unknown) =>
-    z.object({ optOut: z.boolean(), nickname: z.string().trim().max(24) }).parse(d),
+    z.object({ nickname: z.string().trim().max(24) }).parse(d),
   )
   .handler(async ({ data, context }) => {
     const { error } = await context.supabase.from("leaderboard_prefs").upsert(
-      { user_id: context.userId, opt_out: data.optOut, nickname: data.nickname, updated_at: new Date().toISOString() },
+      { user_id: context.userId, nickname: data.nickname, updated_at: new Date().toISOString() },
       { onConflict: "user_id" },
     );
     if (error) throw new Error("Could not save");
