@@ -36,43 +36,10 @@ async function assertAdmin(supabase: any, userId: string) {
   if (error || !data) throw new Error("Forbidden");
 }
 
-/** Creates the very first admin account. Refuses once any admin exists. */
-export const bootstrapAdmin = createServerFn({ method: "POST" })
-  .inputValidator((d: unknown) =>
-    z
-      .object({ username: usernameSchema, password: passwordSchema, displayName: z.string().trim().max(80) })
-      .parse(d),
-  )
-  .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { count } = await supabaseAdmin
-      .from("user_roles")
-      .select("id", { count: "exact", head: true })
-      .eq("role", "admin");
-    if ((count ?? 0) > 0) throw new Error("An administrator already exists");
-
-    // Only usable on a brand-new, empty installation. Once any account exists,
-    // new administrators must be created by a signed-in administrator.
-    const { count: profileCount } = await supabaseAdmin
-      .from("profiles")
-      .select("id", { count: "exact", head: true });
-    if ((profileCount ?? 0) > 0) throw new Error("Setup is already complete");
-
-    const { data: created, error } = await supabaseAdmin.auth.admin.createUser({
-      email: emailFor(data.username),
-      password: data.password,
-      email_confirm: true,
-    });
-    if (error || !created.user) throw new Error(error?.message ?? "Could not create admin");
-
-    await supabaseAdmin.from("profiles").insert({
-      id: created.user.id,
-      username: data.username.toLowerCase(),
-      display_name: data.displayName || data.username,
-    });
-    await supabaseAdmin.from("user_roles").insert({ user_id: created.user.id, role: "admin" });
-    return { ok: true };
-  });
+/** Open first-admin setup is disabled: administrators are created by existing admins only. */
+export const bootstrapAdmin = createServerFn({ method: "POST" }).handler(async (): Promise<{ ok: boolean }> => {
+  throw new Error("Setup is disabled");
+});
 
 export const adminExists = createServerFn({ method: "GET" }).handler(async () => {
   const { supabaseAdmin } = await import("@/integrations/supabase/client.server");

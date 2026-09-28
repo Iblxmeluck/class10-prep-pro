@@ -47,7 +47,7 @@ function AuthPage() {
     setBusy(true);
     try {
       if (setupMode) {
-        await bootstrapAdmin({ data: { username, password, displayName } });
+        await bootstrapAdmin();
         toast.success("Administrator created. Signing you in…");
         await refetch();
       }
