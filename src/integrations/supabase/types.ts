@@ -77,6 +77,27 @@ export type Database = {
         }
         Relationships: []
       }
+      answer_stats: {
+        Row: {
+          attempted: number
+          correct: number
+          day: string
+          user_id: string
+        }
+        Insert: {
+          attempted?: number
+          correct?: number
+          day: string
+          user_id: string
+        }
+        Update: {
+          attempted?: number
+          correct?: number
+          day?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       challenge_sessions: {
         Row: {
           created_at: string
@@ -2195,6 +2216,7 @@ export type Database = {
         Args: { _page: string; _uid: string }
         Returns: boolean
       }
+      convert_all_game_points: { Args: never; Returns: number }
       dashboard_counts: { Args: never; Returns: Json }
       has_role: {
         Args: {
