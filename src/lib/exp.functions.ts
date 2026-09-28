@@ -18,6 +18,9 @@ async function assertAdmin(ctx: { supabase: { rpc: Function }; userId: string })
   return true;
 }
 
+/** Rounds whose tallies are self-reported by the browser never earn EXP. */
+const SELF_REPORTED_GAMES = ["memory_match", "word_builder"];
+
 async function addExp(db: Admin, userId: string, delta: number, reason: string, ref?: string | null) {
   if (!delta) return 0;
   if (ref) {
@@ -55,9 +58,26 @@ export const awardExpForEvent = createServerFn({ method: "POST" })
     z.object({ key: z.string().min(1).max(50), ref: z.string().max(100).optional() }).parse(d),
   )
   .handler(async ({ data, context }) => {
-    const allowed = ["todo_task", "streak_day", "chapter_complete", "achievement"];
-    if (!allowed.includes(data.key)) throw new Error("Unknown reward");
-    const gained = await awardRuleExp(context.userId, data.key, data.ref ?? null);
+    // Only to-do rewards can be claimed from the browser, and only for a real,
+    // completed to-do owned by the caller, capped per day.
+    if (data.key !== "todo_task" || !data.ref) throw new Error("Unknown reward");
+    const ref = z.string().uuid().parse(data.ref);
+    const { data: todo } = await context.supabase
+      .from("todos")
+      .select("id, user_id, is_done")
+      .eq("id", ref)
+      .maybeSingle();
+    if (!todo || todo.user_id !== context.userId || !todo.is_done) throw new Error("Task not completed");
+    const db = await admin();
+    const since = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+    const { count } = await db
+      .from("exp_ledger")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", context.userId)
+      .eq("reason", "todo_task")
+      .gte("created_at", since);
+    if ((count ?? 0) >= 10) return { gained: 0 };
+    const gained = await awardRuleExp(context.userId, "todo_task", ref);
     return { gained };
   });
 
@@ -72,6 +92,7 @@ export const getGamePoints = createServerFn({ method: "POST" })
         .from("game_attempts")
         .select("id, score, correct")
         .eq("user_id", context.userId)
+        .not("game_key", "in", `(${SELF_REPORTED_GAMES.join(",")})`)
         .order("created_at", { ascending: false })
         .limit(300),
       db.from("exp_ledger").select("ref").eq("user_id", context.userId).eq("reason", "game_point").limit(2000),
@@ -95,6 +116,7 @@ export const convertGamePoints = createServerFn({ method: "POST" })
         .from("game_attempts")
         .select("id, score, correct")
         .eq("user_id", context.userId)
+        .not("game_key", "in", `(${SELF_REPORTED_GAMES.join(",")})`)
         .order("created_at", { ascending: false })
         .limit(300),
       db.from("exp_ledger").select("ref").eq("user_id", context.userId).eq("reason", "game_point").limit(2000),
